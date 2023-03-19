@@ -54,3 +54,12 @@
 
 (define x 0.19999770003)
 (abs-error (sqrt x) x)
+
+(define (square-log x)
+  (exp (double (log x))))
+
+(define (double x)
+  (+ x x))
+
+(square-log 3)
+(square 3)
