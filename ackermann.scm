@@ -103,15 +103,11 @@
 ; g = 2^n
 (define (g n) (A 1 n))
 
-; h = 2^2^2^2...
+; h = 2^2^2... = 2^(h (n-1)) for n>1
 (define (h n) (A 2 n))
 (define (hx n) 
-  (if (= n 0) 
-    1
-    (expt 2 (hx (- n 1)))))
+  (expt 2 (h (- n 1))))
 
-(h 1)
-(hx 1)
 (h 2)
 (hx 2)
 (h 3)
