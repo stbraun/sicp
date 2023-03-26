@@ -43,10 +43,34 @@
 (define (square n)
   (* n n))
 
-(fast-expt-r 2 5)                 
-(fast-expt-r 3 4)
+(define (assert expected actual)
+  (display (= expected actual)) (display ": ") 
+  (display expected) (display " != ") (display actual) (newline))
+
+(assert (expt 2 5) (fast-expt-r 2 5))
+(assert (expt 3 4) (fast-expt-r 3 4))
+(assert (expt 7 13) (fast-expt-r 7 13))
 
 ; Exercise 1.16 - A recursice procedure that creates an iterative process
 ; with O(log n) steps.
+; Use that (b^(n/2)^2 = (b^2)^(n/2).
+; Introduce a variable a such that the expression ab^n is constant from state to state.
 
+(define (fast-expt-i b n)
+  (fast-iter b n 1))
 
+(define (fast-iter b n a)
+  (trace-i b n a)
+  (cond ((= n 0) a)
+        ((even? n) (fast-iter (square b) (/ n 2) a))
+        (else (fast-iter b (- n 1) (* a b)))))
+
+(define (trace-i b n a)
+  (display "n = ") (display n) 
+  (display ": b = ") (display b) 
+  (display ", a = ") (display a) 
+  (display " - a*b^n = ") (display (* a (expt b n))) (newline))
+
+(assert (expt 2 5) (fast-expt-i 2 5))
+(assert (expt 3 4) (fast-expt-i 3 4))
+(assert (expt 7 13) (fast-expt-i 7 13))
