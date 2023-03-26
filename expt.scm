@@ -3,6 +3,8 @@
 ; Compute the exponential of a given number.
 ; the procedure takes as arguments a base b and a positive integer n and computes b^n.
 
+(require "utils.scm")
+
 ; A recursive procedure that creates a linear recursive process.
 ; It requires O(n) steps and O(n) space.
 (define (expt-r b n)
@@ -39,9 +41,6 @@
 
 (define (even? n)
   (= (remainder n 2) 0))
-
-(define (square n)
-  (* n n))
 
 (define (assert expected actual)
   (display (= expected actual)) (display ": ") 

@@ -2,6 +2,7 @@
 ; Since x is bound in the definition of sqrt, the internal procedures are in the scope of x.
 ; Thus, x can be used as a free variable in the internal definitions.
 
+(require "utils.scm")
 
 (define (sqrt x)
   (define (sqrt-iter guess last-guess)
@@ -18,9 +19,6 @@
     (/ (+ v1 v2) 2))
   (sqrt-iter 1.0 x))
 
-
-(define (square val)
-  (* val val))
 
 ; Test
 (define (test-sqrt x)
