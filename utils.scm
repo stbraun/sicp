@@ -1,5 +1,3 @@
-
-
 ; Some utility functions.
 (module utils racket
         (provide square)
