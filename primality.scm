@@ -138,3 +138,98 @@
 ; 1000039*** 15
 ; 1000081*** 15
 ; 1000099*** 15
+
+
+; Exercise 1.23
+; Improve smallest-divisor to check for 2 and odd numbers only.
+
+
+; n is prime if and only if n is its own smallest divisor.
+(define (prime2? n)
+  (define (smallest-divisor n)
+    (find-divisor n 2))
+  (define (find-divisor n test-divisor)
+    (cond ((> (square test-divisor) n) n)
+          ((divides? test-divisor n) test-divisor)
+          (else (find-divisor n (next test-divisor)))))
+  (define (divides? a b)
+    (= (remainder b a) 0))
+  (define (next n)
+    (if (= n 2) 
+      3
+      (+ n 2)))
+  (= n (smallest-divisor n)))
+
+
+(define (timed-prime-test2 n)
+  (define (start-prime-test n start-time)
+    (if (prime2? n)
+      (report-prime n (- (runtime) start-time))))
+  (define (report-prime n elapsed-time)
+    (newline)
+    (display n)
+    (display "*** ")
+    (display elapsed-time))
+  (start-prime-test n (runtime)))
+
+
+(define (search-for-primes2 start end)
+  (cond ((even? start) (search-for-primes2 (+ start 1) end))
+        ((< start end) (timed-prime-test2 start)
+                       (search-for-primes2 (+ start 2) end))))
+
+
+(search-for-primes2 1000 1020)
+(search-for-primes2 10000 10040)
+(search-for-primes2 100000 100050)
+(search-for-primes2 1000000 1000100)
+
+; Exercise 1.24
+; Repeat the same test using fast-prime?. This algorithm
+; has O(log n) growth.
+
+(define (timed-prime-test3 n)
+  (define (start-prime-test n start-time)
+    (if (fast-prime? n 55)
+      (report-prime n (- (runtime) start-time))))
+  (define (report-prime n elapsed-time)
+    (newline)
+    (display n)
+    (display "*** ")
+    (display elapsed-time))
+  (start-prime-test n (runtime)))
+
+
+(define (search-for-primes3 start end)
+  (cond ((even? start) (search-for-primes3 (+ start 1) end))
+        ((< start end) (timed-prime-test3 start)
+                       (search-for-primes3 (+ start 2) end))))
+
+
+(search-for-primes3 1000 1020)
+(search-for-primes3 10000 10038)
+(search-for-primes3 100000 100045)
+(search-for-primes3 1000000 1000038)
+
+; > (search-for-primes3 1000 1020)
+; 
+; 1009*** 31
+; 1013*** 32
+; 1019*** 33
+; > (search-for-primes3 10000 10038)
+; 
+; 10007*** 42
+; 10009*** 42
+; 10037*** 42
+; > (search-for-primes3 100000 100045)
+; 
+; 100003*** 49
+; 100019*** 49
+; 100043*** 48
+; > (search-for-primes3 1000000 1000038)
+; 
+; 1000003*** 56
+; 1000033*** 56
+; 1000037*** 58
+
+
