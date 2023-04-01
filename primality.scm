@@ -33,10 +33,13 @@
 ; Fermat test: This test is based on Fermat's Little Theorem:
 ; > If n is a prime number and a is any positive integer less than n, 
 ; > then a raised to the nth power is congruent to a modulo n.
+;
 ; Two numbers are said to be congruent modulo n 
 ; if they both have the same remainder when divided by n.
+;
 ; If n is not prime, then, in general, 
 ; most of the numbers a < n will not satisfy the above condition.
+;
 ; This leads to the following algorithm for testing primality:
 ; Given a number n, pick a random number a < n and compute the 
 ; remainder of a^n modulo n.
@@ -232,4 +235,53 @@
 ; 1000033*** 56
 ; 1000037*** 58
 
+
+; Exercise 1.27
+; Demonstrate that the Carmichael  numbers fool the Fermat test.
+; Write a procedure that takes an integer n and tests whether
+; a^n is congruent to a modulo n for every a < n.
+; Run this procedure with some well-known Carmichael numbers.
+
+(define (test-congruence-for-all-values-less-than-n n)
+  (define (test-all a n)
+    (cond ((= a 0) true)
+          ((= (expmod a n n) a) (test-all (- a 1) n))
+          (else false)))
+  (test-all (- n 1) n))
+
+(test-congruence-for-all-values-less-than-n 13)
+(test-congruence-for-all-values-less-than-n 15)
+; Test for Carmicheal numbers:
+(test-congruence-for-all-values-less-than-n 561)
+(test-congruence-for-all-values-less-than-n 1105)
+(test-congruence-for-all-values-less-than-n 1729)
+(test-congruence-for-all-values-less-than-n 2465)
+(test-congruence-for-all-values-less-than-n 2821)
+(test-congruence-for-all-values-less-than-n 6601)
+
+
+; Exercise 1.28
+; Miller-Rabin test
+
+(define (miller-rabin-test n)
+  (define (expmod base exp m)
+    (define (remainder-square-checked x m)
+      (if (and (not (or (= x 1)
+                        (= x (- m 1))))
+               (= (remainder (square x) m) 1))
+        0
+        (remainder (square x) m)))
+    (cond ((= exp 0) 1)
+          ((even? exp)
+           (remainder-square-checked (expmod base (/ exp 2) m) m))
+          (else (remainder (* base (expmod base (- exp 1) m)) m))))
+  (define (try-it a)
+    (= (expmod a (- n 1) n) 1))
+  (try-it (+ 1 (random (- n 1)))))
+
+(miller-rabin-test 17)  ; #t
+(miller-rabin-test 119) ; #f
+(miller-rabin-test 561) ; #f - Carmichael number
+(miller-rabin-test 31)  ; #t
+(miller-rabin-test 99)  ; #f
 
