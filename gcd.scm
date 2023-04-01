@@ -19,10 +19,10 @@
 
         (module+ test
                  (require rackunit)
-                 (check-eq? 4 (gcd 16 12))
-                 (check-eq? 4 (gcd 12 16))
-                 (check-eq? 2 (gcd 206 40))
-                 (check-eq? 1 (gcd 23 49))
-                 (check-eq? 17 (gcd 34 119))
+                 (check-equal? 4 (gcd 16 12))
+                 (check-equal? 4 (gcd 12 16))
+                 (check-equal? 2 (gcd 206 40))
+                 (check-equal? 1 (gcd 23 49))
+                 (check-equal? 17 (gcd 34 119))
                  )
         )

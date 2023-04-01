@@ -14,8 +14,8 @@
 
         (module+ test
                  (require rackunit)
-                 (check-eq? (* 13 7) (mult-lin 13 7)) 
-                 (check-eq? (* 13 27) (mult-lin 13 27)))
+                 (check-equal? (* 13 7) (mult-lin 13 7)) 
+                 (check-equal? (* 13 27) (mult-lin 13 27)))
 
 
         ; Now suppose we include, together with addition,
@@ -38,8 +38,8 @@
                 (else (+ a (fast-mult-r a (- b 1))))))
 
         (module+ test
-                 (check-eq? (* 13 7) (fast-mult-r 13 7))
-                 (check-eq? (* 13 27) (fast-mult-r 13 27))) 
+                 (check-equal? (* 13 7) (fast-mult-r 13 7))
+                 (check-equal? (* 13 27) (fast-mult-r 13 27))) 
 
         ; Provide a fast-mult creating an iterative process.
 
@@ -53,6 +53,6 @@
                 (else (iter a (- b 1) (+ acc a)))))
 
         (module+ test
-                 (check-eq? (* 13 7) (fast-mult 13 7))
-                 (check-eq? (* 13 27) (fast-mult 13 27)))
+                 (check-equal? (* 13 7) (fast-mult 13 7))
+                 (check-equal? (* 13 27) (fast-mult 13 27)))
         )
