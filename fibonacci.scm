@@ -11,13 +11,13 @@
 
         (module+ test
                  (require rackunit)
-                 (check-= 0 (fib-2r 0) 0)
-                 (check-= 1 (fib-2r 1) 0)
-                 (check-= 1 (fib-2r 2) 0)
-                 (check-= 2 (fib-2r 3) 0)
-                 (check-= 3 (fib-2r 4) 0)
-                 (check-= 5 (fib-2r 5) 0)
-                 (check-= 55 (fib-2r 10) 0))
+                 (check-eq? 0 (fib-2r 0))
+                 (check-eq? 1 (fib-2r 1))
+                 (check-eq? 1 (fib-2r 2))
+                 (check-eq? 2 (fib-2r 3))
+                 (check-eq? 3 (fib-2r 4))
+                 (check-eq? 5 (fib-2r 5))
+                 (check-eq? 55 (fib-2r 10)))
 
         ; iterative approach
         (define (fib-i n)
@@ -29,11 +29,11 @@
             (fib-iter (+ a b) a (- count 1))))
 
         (module+ test
-                 (check-= 0 (fib-i 0) 0)
-                 (check-= 1 (fib-i 1) 0)
-                 (check-= 1 (fib-i 2) 0)
-                 (check-= 2 (fib-i 3) 0)
-                 (check-= 3 (fib-i 4) 0)
-                 (check-= 5 (fib-i 5) 0)
-                 (check-= 55 (fib-i 10) 0))
+                 (check-eq? 0 (fib-i 0))
+                 (check-eq? 1 (fib-i 1))
+                 (check-eq? 1 (fib-i 2))
+                 (check-eq? 2 (fib-i 3))
+                 (check-eq? 3 (fib-i 4))
+                 (check-eq? 5 (fib-i 5))
+                 (check-eq? 55 (fib-i 10)))
         )

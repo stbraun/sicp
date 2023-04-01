@@ -12,13 +12,10 @@
             0
             (+ a (mult-lin a (- b 1)))))
 
-        (define (check-= expected actual)
-          (printf "~a =!= ~a\n" expected actual))
-
         (module+ test
                  (require rackunit)
-                 (check-= (* 13 7) (mult-lin 13 7) 0) 
-                 (check-= (* 13 27) (mult-lin 13 27) 0))
+                 (check-eq? (* 13 7) (mult-lin 13 7)) 
+                 (check-eq? (* 13 27) (mult-lin 13 27)))
 
 
         ; Now suppose we include, together with addition,
@@ -41,8 +38,8 @@
                 (else (+ a (fast-mult-r a (- b 1))))))
 
         (module+ test
-                 (check-= (* 13 7) (fast-mult-r 13 7) 0)
-                 (check-= (* 13 27) (fast-mult-r 13 27) 0)) 
+                 (check-eq? (* 13 7) (fast-mult-r 13 7))
+                 (check-eq? (* 13 27) (fast-mult-r 13 27))) 
 
         ; Provide a fast-mult creating an iterative process.
 
@@ -56,6 +53,6 @@
                 (else (iter a (- b 1) (+ acc a)))))
 
         (module+ test
-                 (check-= (* 13 7) (fast-mult 13 7) 0)
-                 (check-= (* 13 27) (fast-mult 13 27) 0))
+                 (check-eq? (* 13 7) (fast-mult 13 7))
+                 (check-eq? (* 13 27) (fast-mult 13 27)))
         )

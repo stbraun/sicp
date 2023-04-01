@@ -20,12 +20,12 @@
 
         (module+ test
                  (require rackunit)
-                 (check-= 32 (expt-r 2 5) 0))
+                 (check-eq? 32 (expt-r 2 5)))
 
         ; A recursive procedure creating a linear iterative process.
         ; It requires O(n) steps and O(1) space.
         (define (expt-i b n)
-          (expt-iter b 1.0 n))
+          (expt-iter b 1 n))
 
         (define (expt-iter b acc n)
           (if (= n 0)
@@ -33,7 +33,7 @@
             (expt-iter b (* acc b) (- n 1))))
 
         (module+ test
-                 (check-= 32 (expt-i 2 5) 0))
+                 (check-eq? 32 (expt-i 2 5)))
 
         ; We can compute the exponentiation with less steps by using successive squaring.
         ; E.g. b^8: b^2 = b*b; b^4= b^2 * b^2; b^8 = b^4 * b^4
@@ -55,9 +55,9 @@
           (display expected) (display " != ") (display actual) (newline))
 
         (module+ test
-                 (check-= (expt 2 5) (fast-expt-r 2 5) 0)
-                 (check-= (expt 3 4) (fast-expt-r 3 4) 0)
-                 (check-= (expt 7 13) (fast-expt-r 7 13) 0))
+                 (check-eq? (expt 2 5) (fast-expt-r 2 5))
+                 (check-eq? (expt 3 4) (fast-expt-r 3 4))
+                 (check-eq? (expt 7 13) (fast-expt-r 7 13)))
 
         ; Exercise 1.16 - A recursice procedure that creates an iterative process
         ; with O(log n) steps.
@@ -80,7 +80,7 @@
           (display " - a*b^n = ") (display (* a (expt b n))) (newline))
 
         (module+ test
-                 (check-= (expt 2 5) (fast-expt-i 2 5) 0)
-                 (check-= (expt 3 4) (fast-expt-i 3 4) 0)
-                 (check-= (expt 7 13) (fast-expt-i 7 13) 0))
+                 (check-eq? (expt 2 5) (fast-expt-i 2 5))
+                 (check-eq? (expt 3 4) (fast-expt-i 3 4))
+                 (check-eq? (expt 7 13) (fast-expt-i 7 13)))
         )

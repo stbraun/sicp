@@ -29,6 +29,6 @@
 
         (module+ test
                  (require rackunit)
-                 (check-= 120 (factorial-r 5) 0)
-                 (check-= 120 (factorial-i 5) 0))
+                 (check-eq? 120 (factorial-r 5))
+                 (check-eq? 120 (factorial-i 5)))
         )
