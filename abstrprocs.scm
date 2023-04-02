@@ -89,3 +89,26 @@
 
 (simpsons-rule sin 0 pi 100)
 (simpsons-rule sin 0 pi 1000)
+
+; Exercise 1.30
+; Write a version of sum that performs iteratively.
+
+(define (sum-i term a next b)
+  (define (iter a result)
+    (if (> a b)
+      result
+      (iter (next a) (+ result (term a)))))
+  (iter a 0))
+
+(sum-i identity 1 inc 10)
+(sum-i cube 1 inc 10)
+
+(timed-test (lambda (n) (sum cube 1 inc n)) 100 "sum cube 1 to n")
+(timed-test (lambda (n) (sum cube 1 inc n)) 1000 "sum cube 1 to n")
+(timed-test (lambda (n) (sum cube 1 inc n)) 10000 "sum cube 1 to n")
+
+(timed-test (lambda (n) (sum-i cube 1 inc n)) 100 "sum-i cube 1 to n")
+(timed-test (lambda (n) (sum-i cube 1 inc n)) 1000 "sum-i cube 1 to n")
+(timed-test (lambda (n) (sum-i cube 1 inc n)) 10000 "sum-i cube 1 to n")
+
+
