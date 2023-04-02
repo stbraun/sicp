@@ -1,6 +1,8 @@
 ; Building abstractions with procedures.
 ; Using procedures as arguments and results.
 
+(require "utils.scm")
+
 ; Often the same patterns shows up when writing procedures.
 ; For example, when summing up some values the skeleton of
 ; the procedures looks mostly the same: it checks for the base case,
@@ -51,6 +53,7 @@
 (integral cube 0 1 0.01)
 (integral cube 0 1 0.001)
 
+; Exercise 1.29
 ; Simpson's Rule is a more accurate method of numerical integration than the method illustrated above.
 ; Using Simpson's Rule, the integral of a function f between a and b is approximated as:
 ; h/3 * [y0 + 4*y1 + 2*y2 + 4*y3 + 2*y4 +...+ 2*y(n-2) + 4*y(n-1) + yn]
@@ -71,9 +74,18 @@
   (* (/ h 3) (sum term a next b)))
 
 
-(simpsons-rule cube 0 1.0 100)
-(simpsons-rule cube 0 1.0 1000)
-(simpsons-rule cube 0 1.0 10000)
+; The exact integral of function cube between 0 and 1 is 1/4.
+(abs (- 0.25 (simpsons-rule cube 0 1.0 100)))
+(abs (- 0.25 (simpsons-rule cube 0 1.0 1000)))
+(abs (- 0.25 (simpsons-rule cube 0 1.0 10000)))
+
+; measure runtime
+(define (cube-int n)
+  (simpsons-rule cube 0 1.0 n))
+
+(timed-test cube-int 100 "Integral of function cube between 0 and 1.0.")
+(timed-test cube-int 1000 "Integral of function cube between 0 and 1.0.")
+(timed-test cube-int 10000 "Integral of function cube between 0 and 1.0.")
 
 (simpsons-rule sin 0 pi 100)
 (simpsons-rule sin 0 pi 1000)

@@ -1,11 +1,31 @@
 ; Some utility functions.
 (module utils racket
         (provide square
-                 expected)
+                 expected
+                 timed-test)
 
+        (require sicp)
+        
         (define (square x)
           (*  x x))
 
         (define (expected ex act)
             (printf "~a =!= ~a\n" ex act))
+        
+        ; Measure runtime of a procedure.
+        (define (timed-test f n message)
+          (define (start-test n start-time)
+            (if (f n)
+              (report-time n (- (runtime) start-time))))
+          (define (report-time n elapsed-time)
+            (display "n=")
+            (display n)
+            (display " *** ")
+            (display elapsed-time)
+            (display "msec")
+            (display "  - ")
+            (display message)
+            (newline))
+          (start-test n (runtime)))
+
         )
