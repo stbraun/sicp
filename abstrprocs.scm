@@ -60,14 +60,20 @@
 (define (simpsons-rule f a b n)
   (define h
     (/ (- b a) n))
+  (define (k x)
+    (round (/ (- x a) h)))
   (define (term x)
     (cond ((or (= x a) (= x b)) (f x))
-          ((even? (/ (- x a) h)) (* 2 (f x)))
+          ((even? (k x)) (* 2 (f x)))
           (else (* 4 (f x)))))
   (define (next x)
     (+ x h))
   (* (/ h 3) (sum term a next b)))
 
 
-(simpsons-rule cube 0 1 100)
-(simpsons-rule cube 0 1 1000)
+(simpsons-rule cube 0 1.0 100)
+(simpsons-rule cube 0 1.0 1000)
+(simpsons-rule cube 0 1.0 10000)
+
+(simpsons-rule sin 0 pi 100)
+(simpsons-rule sin 0 pi 1000)
