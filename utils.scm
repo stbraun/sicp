@@ -2,7 +2,8 @@
 (module utils racket
         (provide square
                  expected
-                 timed-test)
+                 timed-test
+                 average)
 
         (require sicp)
         
@@ -28,4 +29,6 @@
             (newline))
           (start-test n (runtime)))
 
+        (define (average a b)
+          (/ (+ a b)))
         )
