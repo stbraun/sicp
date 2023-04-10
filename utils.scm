@@ -30,5 +30,5 @@
           (start-test n (runtime)))
 
         (define (average a b)
-          (/ (+ a b)))
+          (/ (+ a b) 2))
         )

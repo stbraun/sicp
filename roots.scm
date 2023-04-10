@@ -59,7 +59,7 @@
 
 
 ; Exercise 1.36
-; Modify fixed-point to print the sequencce of approximations it generates.
+; Modify fixed-point to print the sequence of approximations it generates.
 ; Then find the solution to x^x = 1000 finding a fixed point of x -> log(1000)/log(x).
 
 
@@ -78,6 +78,16 @@
 
 (fp (lambda (x) (/ (log 1000) (log x))) 2.0)
 
+
+(define (average-damp f)
+  (lambda (x) (average x (f x))))
+
+((average-damp square) 10)
+
+(fp (lambda (x) (+ 1 (/ 1 x))) 1.0)
+(fp (average-damp (lambda (x) (+ 1 (/ 1 x)))) 1.0)
+
+
 ; Exercise 1.37
 ; Write a continued fraction function.
 
@@ -88,4 +98,33 @@
 ; Approximate phi (golden ratio) using a continued fraction.
 (cont-frac (lambda (i) 1.0) (lambda (i) 1.0) 10)
 
+
+; Newton's method
+
+; Return the derivative of a function g.
+; The derivative is calculated as (g(x + dx) - g(x)) / dx
+
+(define dx 0.00001)
+
+(define (deriv g)
+  (lambda (x)
+    (/ (- (g (+ x dx)) (g x)) dx)))
+
+(define (cube x) (* x x x))
+
+((deriv cube) 5)
+
+; Newton transform is x - g(x) / g'(x)
+(define (newton-transform g)
+  (lambda (x)
+    (- x (/ (g x) ((deriv g) x)))))
+
+(define (newtons-method g guess)
+  (fixed-point (newton-transform g) guess))
+
+; Example:
+(define (sqrt x)
+  (newtons-method (lambda (y) (- (square y) x)) 1.0))
+
+(sqrt 2.0)
 
