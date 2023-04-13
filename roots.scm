@@ -90,13 +90,14 @@
 
 ; Exercise 1.37
 ; Write a continued fraction function.
+; n0 / (d0 + (n1 / (d1 + (n2 / d2 + ... + n(k) / d(k)))))
 
 (define (cont-frac n d k)
   (if (= k 0) (/ (n k) (d k))
     (/ (n k) (+ (d k) (cont-frac n d (- k 1))))))
 
-; Approximate phi (golden ratio) using a continued fraction.
-(cont-frac (lambda (i) 1.0) (lambda (i) 1.0) 10)
+; Approximate 1/phi (golden ratio) using a continued fraction.
+(/ 1 (cont-frac (lambda (i) 1.0) (lambda (i) 1.0) 30))
 
 
 ; Newton's method
@@ -127,4 +128,28 @@
   (newtons-method (lambda (y) (- (square y) x)) 1.0))
 
 (sqrt 2.0)
+
+
+; A procedure that applies a given transformation to a given function
+; and computes a fixed point.
+
+(define (fixed-point-of-transform g transform guess)
+  (fixed-point (transform g) guess))
+
+; Applying the new procedure to calculate the square root.
+
+(define (sqrt-fp x)
+  (fixed-point-of-transform (lambda (y) (/ x y)) average-damp 1.0))
+
+(sqrt-fp 2.0)
+
+; Using the Newton transform to compute the square root.
+
+(define (sqrt-newton x)
+  (fixed-point-of-transform (lambda (y) (- (square y) x))
+                            newton-transform
+                            1.0))
+
+(sqrt-newton 2.0)
+
 
