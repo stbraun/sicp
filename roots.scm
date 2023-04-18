@@ -163,4 +163,35 @@
 
 (newtons-method (cubic 1 1 1) 1)
 
+; Exercise 1.41
+; Define a procedure double that takes a procedure of one argument as argument and returns aprocedure that applies the original procedure twice.
+; For example, if inc is a procedure that adds 1 to its argument, 
+; then (double inc) should be a procedure that adds 2. 
+; What value is returned by (((double (double double)) inc) 5)?
+
+(define (double f)
+  (lambda (x) (f (f x))))
+
+(define (inc x)
+  (+ x 1))
+
+((double inc) 5)  ; 7
+
+(((double double) inc) 5)
+((double (double inc)) 5)
+
+(((double (double double)) inc) 5)  ; 21
+(((double double) ((double double) inc)) 5)
+(((double double) (double (double inc))) 5)
+((double (double (double (double inc)))) 5)
+
+
+; Exercise 1.42
+; Define a procedure implementing function composition.
+; f after g is defined as f(g(x)).
+
+(define (compose f g)
+  (lambda (x) (f (g x))))
+
+((compose square inc) 6)  ; 49
 
