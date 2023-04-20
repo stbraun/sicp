@@ -14,7 +14,7 @@
 
         (define (gcd a b)
           (if (= b 0)
-            a
+            (abs a)
             (gcd b (remainder a b))))
 
         (module+ test
@@ -24,5 +24,8 @@
                  (check-equal? 2 (gcd 206 40))
                  (check-equal? 1 (gcd 23 49))
                  (check-equal? 17 (gcd 34 119))
+                 (check-equal? 17 (gcd -34 119))
+                 (check-equal? 17 (gcd 34 -119))
+                 (check-equal? 17 (gcd -34 -119))
                  )
         )
