@@ -12,8 +12,6 @@
                  print-rat
                  printn-rat)
 
-        (require "gcd.scm")
-
         ; Create a rational number and reduce it to lowest terms.
         (define (make-rat numerator denominator)
           (let ((g (gcd numerator denominator)))
