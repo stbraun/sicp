@@ -148,4 +148,47 @@
 
 ; ------------
 
+(define x (cons (list 1 2) (list 3 4)))
+
+(length x)
+
+; Count the leaves of a tree.
+(define (count-leaves tree)
+  (cond ((null? tree) 0)
+        ((not (pair? tree)) 1)
+        (else
+          (+ (count-leaves (car tree)) (count-leaves (cdr tree))))))
+
+(count-leaves x)
+(count-leaves (list x x))
+
+; Exercise 2.25
+; Give car / cdr combinations to pick the 7 from each of the following lists.
+
+(define ll1 (list 1 3 (list 5 7) 9))
+(define ll2 (list (list 7)))
+(define ll3 (list 1 (list 2 (list 3 (list 4 (list 5 (list 6 7)))))))
+
+(car (cdr (car (cdr ( cdr ll1)))))
+(caar ll2)
+
+(car (cdr (car (cdr (car (cdr (car (cdr (car (cdr (car (cdr ll3))))))))))))
+
+; ------------
+
+; Exercise 2.26
+; Implement a deep-reverse procedure.
+; (deep-reverse (list (list 1 2) (list 3 4))) --> ((4 3) (2 1))
+
+(define (deep-reverse l)
+  (l))
+
+
+(let ((ll (list (list 1 2) (list 3 4))))
+  (display (deep-reverse ll)))
+
+
+(define (reverse l)
+  (if (null? l) nil
+    (append (reverse (cdr l)) (list (car l)))))
 
