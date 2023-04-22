@@ -176,19 +176,19 @@
 
 ; ------------
 
-; Exercise 2.26
+; Exercise 2.27
 ; Implement a deep-reverse procedure.
 ; (deep-reverse (list (list 1 2) (list 3 4))) --> ((4 3) (2 1))
 
 (define (deep-reverse l)
-  (l))
+  (if (pair? l)
+    (reverse (map deep-reverse l)) 
+    l))
 
 
 (let ((ll (list (list 1 2) (list 3 4))))
   (display (deep-reverse ll)))
 
+; ------------
 
-(define (reverse l)
-  (if (null? l) nil
-    (append (reverse (cdr l)) (list (car l)))))
 
