@@ -133,4 +133,19 @@
 
 ; ------------
 
+(display (map + (list 1 2 3) (list 2 4 6)))
+(display (map (lambda (x y) (+ 1 (* x y))) (list 1 2 3) (list 2 4 6)))
+
+; Exercise 2.23
+; Implement for-each. The procedure applies a given function to each of the given items.
+; It does not return any result.
+(define (for-each f items)
+  (cond ((not (null? items))
+    (f (car items))
+    (for-each f (cdr items)))))
+        
+(for-each (lambda (x) (newline) (display x)) (list 57 321 88))
+
+; ------------
+
 
