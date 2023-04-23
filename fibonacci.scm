@@ -1,6 +1,7 @@
 ; Tree recursion
 (module fibonacci racket
-        (provide fib-2r
+        (provide fib
+                 fib-2r
                  fib-i)
 
         ; Fibonacci numbers
@@ -27,6 +28,8 @@
           (if (= count 0)
             b
             (fib-iter (+ a b) a (- count 1))))
+
+        (define fib fib-i)
 
         (module+ test
                  (check-equal? 0 (fib-i 0))

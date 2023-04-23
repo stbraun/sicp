@@ -229,4 +229,88 @@
 
 ; ------------
 
+; --- Sequence Operations
+
+(define (filter predicate sequence)
+  (cond ((null? sequence) nil)
+        ((predicate (car sequence))
+         (cons (car sequence)
+               (filter predicate (cdr sequence))))
+        (else (filter predicate (cdr sequence)))))
+
+(display (filter even? (list 1 2 3 4 5 6)))
+
+(define (accumulate op accumulator sequence)
+  (if (null? sequence)
+    accumulator
+    (accumulate op (op accumulator (car sequence)) (cdr sequence))))
+
+(accumulate + 0 (list 10 20 30))
+(accumulate * 1 (list 10 20 30))
+(display (accumulate cons nil (list 10 20 30)))
+
+; Provide an enumerator of integers over a given interval.
+(define (enumerate-interval low high)
+  (if (> low high)
+    nil
+    (cons low (enumerate-interval (+ low 1) high))))
+
+(display (enumerate-interval 2 7))
+
+; Enumerate the leaves of a tree.
+(define (enumerate-tree tree)
+  (cond ((null? tree) nil)
+        ((not (pair? tree)) (list tree))  ; a leaf
+        (else (append (enumerate-tree (car tree))
+                      (enumerate-tree (cdr tree))))))
+
+(display (enumerate-tree (list 1 (list 2 (list 3 4)) 5)))
+
+; Implement sum-odd-squares as signal flow in terms of our sequencde operations:
+;
+; [enumerate: tree leaves]->[filter: odd?]->[map: square]->[accumulate: +, 0]
+
+(define (sum-odd-squares tree)
+  (accumulate +
+              0
+              (map square
+                   (filter odd?
+                           (enumerate-tree tree)))))
+
+(sum-odd-squares (list 1 2 3 4 5))  ; 35
+
+; Implement even-fibs as signal flow:
+;
+; [enumerate: integers]->[map: fib]->[filter: even?]->[accumulate: cons, ()]
+
+(require "fibonacci.scm")
+
+(define (even-fibs n)
+  (accumulate cons
+              nil
+              (filter even?
+                      (map fib
+                           (enumerate-interval 0 n)))))
+
+(display (even-fibs 8))
+
+; Exercise 2.33
+
+(define (map_ p sequence)
+  (accumulate (lambda (x y) (append x (list (p y)))) nil sequence))
+
+(display (map_ (lambda (x) (* 2 x)) (list 2 3 4)))
+
+(define (append_ seq1 seq2)
+  (accumulate cons seq1 seq2))
+
+(display (append_ (list 1 2 3) (list 4 5 6)))
+
+(define (length_ sequence)
+  (accumulate (lambda (a b) (+ a 1)) 0 sequence))
+
+(length_ (list 1 2 3 4))
+
+; ------------
+
 
