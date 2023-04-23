@@ -243,7 +243,9 @@
 (define (accumulate op accumulator sequence)
   (if (null? sequence)
     accumulator
-    (accumulate op (op accumulator (car sequence)) (cdr sequence))))
+    (op (car sequence) 
+        (accumulate op accumulator (cdr sequence)))))
+
 
 (accumulate + 0 (list 10 20 30))
 (accumulate * 1 (list 10 20 30))
@@ -297,19 +299,41 @@
 ; Exercise 2.33
 
 (define (map_ p sequence)
-  (accumulate (lambda (x y) (append x (list (p y)))) nil sequence))
+  (accumulate (lambda (x y) (cons (p x) y)) nil sequence))
 
 (display (map_ (lambda (x) (* 2 x)) (list 2 3 4)))
 
 (define (append_ seq1 seq2)
-  (accumulate cons seq1 seq2))
+  (accumulate cons seq2 seq1))
 
 (display (append_ (list 1 2 3) (list 4 5 6)))
 
 (define (length_ sequence)
-  (accumulate (lambda (a b) (+ a 1)) 0 sequence))
+  (accumulate (lambda (a b) (+ b 1)) 0 sequence))
 
 (length_ (list 1 2 3 4))
+
+; ------------
+
+; Exercise 2.34
+; Evaluate a polynomial using Horner's rule.
+; Given a polynom:
+; a_nx^n + a_{n-1}x^{n-1} + ... + a_1n^1 + a_0
+; Horner's rule structures the computation as:
+; (...(a_nx + a_{n-1}) x + ... + a_1) x + a_0
+; For example, to compute: 1 + 3x + 5x^3 + x^5 at x=2 you would evaluate
+; (horner-eval 2 (list 1 3 0 5 0 1))
+
+(define (horner-eval x coefficient-sequence)
+  (accumulate (lambda (this-coeff higher-terms) 
+                (display this-coeff) (display " - ") (display higher-terms) (newline) 
+                (+ this-coeff (* x higher-terms)))
+              0
+              coefficient-sequence))
+
+
+(+ 1 (* 3 2) (* 5 (expt 2 3)) (* 1 (expt 2 5)))  ; 79
+(horner-eval 2 (list 1 3 0 5 0 1))  ; 79
 
 ; ------------
 
