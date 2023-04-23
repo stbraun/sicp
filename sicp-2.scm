@@ -191,4 +191,42 @@
 
 ; ------------
 
+; Exercise 2.30
+; Square each node of a tree.
+
+(define (square-tree tree)
+  (map (lambda (sub-tree)
+         (if (pair? sub-tree)
+           (square-tree sub-tree)
+           (* sub-tree sub-tree)))
+       tree))
+
+(display
+(square-tree (list 1
+                   (list 2 (list 3 4) 5)
+                   (list 6 7)))
+)
+
+; ------------
+
+; Exercise 2.31
+; Abstract the procedure from 2.30 to work with any funktion.
+
+(define (tree-map f tree)
+  (map (lambda (sub-tree)
+         (if (pair? sub-tree)
+           (tree-map f sub-tree)
+           (f sub-tree)))
+       tree))
+
+(define (square x) (* x x))
+
+(display
+(tree-map square (list 1
+                   (list 2 (list 3 4) 5)
+                   (list 6 7)))
+)
+
+; ------------
+
 
