@@ -241,6 +241,7 @@
 (display (filter even? (list 1 2 3 4 5 6)))
 
 (define (accumulate op accumulator sequence)
+  ; (display "accu: ") (display accumulator) (display ", seq: ") (display sequence) (newline)
   (if (null? sequence)
     accumulator
     (op (car sequence) 
@@ -334,6 +335,24 @@
 
 (+ 1 (* 3 2) (* 5 (expt 2 3)) (* 1 (expt 2 5)))  ; 79
 (horner-eval 2 (list 1 3 0 5 0 1))  ; 79
+
+; ------------
+
+; Exercise 2.35
+; Redefine count-leaves as an accumulation.
+; (accumulate op acc sequence)
+
+(define (count-leaves-a tree)
+  (accumulate + 0 (map (lambda (t) 
+                         1)
+                       (flatten tree))))
+
+; (require racket)
+
+(define lx (list (list 1 2) (list 3 4) 5))
+
+(display (count-leaves-a lx))
+(display (count-leaves-a (list)))
 
 ; ------------
 
