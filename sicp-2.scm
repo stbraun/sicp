@@ -356,4 +356,22 @@
 
 ; ------------
 
+; Exercise 2.36
+; Implement accumulate-n. The procedure works like accumulate
+; but it takes a sequence of sequences as third argument. 
+; The sub-sequences must all be of the same length.
+; accumulate-n combines all the first elements, all the second elements
+; and so on and returns a sequence of the results.
+
+(define (accumulate-n op initial seqs)
+  (if (null? (car seqs))
+    nil
+    (cons (accumulate op initial (map car seqs))
+          (accumulate-n op initial (map cdr seqs)))))
+
+(define seqs (list (list 1 2 3) (list 4 5 6) (list 7 8 9)))
+(accumulate-n + 0 seqs)
+
+; ------------
+
 
