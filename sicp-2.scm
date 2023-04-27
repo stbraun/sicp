@@ -347,8 +347,6 @@
                          1)
                        (flatten tree))))
 
-; (require racket)
-
 (define lx (list (list 1 2) (list 3 4) 5))
 
 (display (count-leaves-a lx))
@@ -374,4 +372,33 @@
 
 ; ------------
 
+; Exercise 2.37
+; Provide some matrix operations.
+; Suppose we represent vectors v = (v_i) as sequence of numbers,
+; and matrices 0  (m_ij) as sequence of vectors (the rows of a matrix).
+; For example, the matrix
+; | 1 2 3 4 |
+; | 4 5 6 6 |
+; | 6 7 8 9 |
+; is represented as the sequence ((1 2 3 4) (4 5 6 6) (6 7 8 9)).
 
+(define (dot-product v w)
+  (accumulate + 0 (map * v w)))
+
+(define (matrix-*-vector m v)
+  (map (lambda (row) (dot-product row v)) m))
+
+(define (transpose m)
+  (accumulate-n cons nil m))
+
+(define (matrix-*-matrix m n)
+  (let ((cols (transpose n)))
+    (map (lambda (row) (matrix-*-vector cols row)) m)))
+
+(let ((m (list (list 1 2 3 4) (list 4 5 6 6) (list 6 7 8 9)))
+      (n (list (list 1 2) (list 3 4) (list 5 6) (list 7 8)))
+      (v (list 1 2 3 4)))
+  (display (dot-product v (reverse v))) (newline)
+  (display (matrix-*-vector m v)) (newline)
+  (display (transpose m)) (newline)
+  (display (matrix-*-matrix m n)) (newline))
