@@ -453,4 +453,19 @@
 
 ; ------------
 
+; Exercise 2.39
+; Implement reverse in terms of fold-left and fold-right.
+
+(define (reverse-r seq)
+  (fold-right (lambda (x y) (append y (list x))) nil seq))
+
+(reverse-r (list 1 2 3))
+
+(define (reverse-l seq)
+  (fold-left (lambda (x y) (append (list y) x)) nil seq))
+
+(reverse-l (list 1 2 3))
+
+; ------------
+
 
