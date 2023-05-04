@@ -4,7 +4,9 @@
 (define (new-rat numerator denominator)
    (cons numerator denominator))
 
-(require "interval.scm")
+(require "interval.scm"
+         "primality.scm"
+         racket)
 
 (define (par1 r1 r2)
   (div-interval (mul-interval r1 r2) (add-interval r1 r2)))
@@ -256,7 +258,7 @@
 (define (enumerate-interval low high)
   (if (> low high)
     nil
-    (cons low (enumerate-interval (+ low 1) high))))
+    (append (list low) (enumerate-interval (+ low 1) high))))
 
 (display (enumerate-interval 2 7))
 
@@ -465,6 +467,88 @@
   (fold-left (lambda (x y) (append (list y) x)) nil seq))
 
 (reverse-l (list 1 2 3))
+
+; ------------
+
+; Nested mappings
+
+(define (flatmap proc seq)
+  (accumulate append nil (map proc seq)))
+
+(define (prime-sum? pair)
+  ; Pair is a list, not a cons: -> use cadr to get the second element!
+  (prime? (+ (car pair) (cadr pair))))
+
+(define (make-pair-sum pair)
+  ; Pair is a list, not a cons: -> use cadr to get the second element!
+  (list (car pair) (cadr pair) (+ (car pair) (cadr pair))))
+
+(define (prime-sum-pairs n)
+  (map make-pair-sum
+       (filter prime-sum?
+               (flatmap
+                 (lambda (i)
+                   (map (lambda (j) (list i j))
+                        (enumerate-interval 1 (- i 1))))
+                 (enumerate-interval 1 n)))))
+
+
+(prime-sum-pairs 6)
+
+; Permutations
+; Create all permutations of a set s.
+(define (permutations s)
+  (if (null? s)     ; empty set?
+    (list nil)      ; sequence containing empty set
+    (flatmap (lambda (x)
+             (map (lambda (p) (cons x p))
+                  (permutations (remove x s))))
+             s)))
+
+(permutations (list 1 2 3))
+
+; Exercise 2.40
+; Define a procedure unique-pairs that, given an integer ,
+; generates a sequence of pairs (i, j), with 1 <= j < i <= n.
+
+(define (unique-pairs n)
+    (flatmap
+      (lambda (i)
+        (map (lambda (j) (list i j))
+             (enumerate-interval 1 (- i 1))))
+        (enumerate-interval 2 n)))
+
+(unique-pairs 4)
+
+(define (prime-sum-pairs-2 n)
+  (map make-pair-sum
+       (filter prime-sum?
+               (unique-pairs n))))
+
+(prime-sum-pairs-2 6)
+
+; ------------
+
+; Exercide 2.41
+; Write a procedure to find all ordered triples of distinct integers i, j and k i
+; less than or equal to a given integer n that sum up to a given integer s.
+(define (triple-sum n s)
+  (define (sum-equal? triple)
+    (= s (+ (car triple) (cadr triple) (caddr triple))))
+  (filter 
+    sum-equal?
+    (flatmap
+      (lambda (i)
+        (flatmap
+          (lambda (j)
+            (map (lambda (k) (list i j k))
+                 (enumerate-interval 1 (- j 1))))
+          (enumerate-interval 1 (- i 1))))
+      (enumerate-interval 1 n))))
+
+
+(triple-sum 5 7)
+(triple-sum 11 13)
 
 ; ------------
 
