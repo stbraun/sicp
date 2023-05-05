@@ -529,7 +529,7 @@
 
 ; ------------
 
-; Exercide 2.41
+; Exercise 2.41
 ; Write a procedure to find all ordered triples of distinct integers i, j and k i
 ; less than or equal to a given integer n that sum up to a given integer s.
 (define (triple-sum n s)
