@@ -552,4 +552,39 @@
 
 ; ------------
 
+; Exercise 2.42
+; Eight queens.
+(define (queens board-size)
+  (define (queens-cols k)
+    (if (= k 0)
+      (list empty-board)
+      (filter 
+        (lambda (positions) (safe? k positions))
+        (flatmap
+          (lambda (rest-of-queens)
+            (map (lambda (new-row)
+                   (adjoin-position new-row k rest-of-queens))
+                 (enumerate-interval 1 board-size)))
+          (queens-cols (- k 1))))))
+  (queens-cols board-size))
+
+(define empty-board nil)
+
+(define (adjoin-position new-row col rest-of-queens)
+  (cons (list new-row col) rest-of-queens))
+
+(define (safe? col positions)
+  ; (display "  --- (safe? ") (display col) (display " ") (display positions) (display ")") (newline)
+  (define (check row col others)
+    (if (null? others)
+      #t
+      (and (not (= row (caar others)))
+           (not (= (- col (cadar others)) (abs (- row (caar others)))))
+           (check row col (cdr others)))))
+  (check (caar positions) col (cdr positions)))
+
+(queens 4)
+
+; ------------
+
 
