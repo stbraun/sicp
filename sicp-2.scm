@@ -554,6 +554,9 @@
 
 ; Exercise 2.42
 ; Eight queens.
+; The positions of queens are modeled by a sequence of (row, col) pairs.
+; All possible positions will be created.
+; Conflicting positions will be removed using a filter.
 (define (queens board-size)
   (define (queens-cols k)
     (if (= k 0)
@@ -570,9 +573,12 @@
 
 (define empty-board nil)
 
+; Create a new position (new-row, col) in front of rest-of-queens.
 (define (adjoin-position new-row col rest-of-queens)
   (cons (list new-row col) rest-of-queens))
 
+; Takes a column number and a list of positions.
+; Checks whether the first position in the list collides with any other position.
 (define (safe? col positions)
   ; (display "  --- (safe? ") (display col) (display " ") (display positions) (display ")") (newline)
   (define (check row col others)
