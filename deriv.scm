@@ -33,6 +33,12 @@
         ((=number? a2 0) a1)
         ((and (number? a1) (number? a2))
          (+ a1 a2))
+        ((and (sum? a1) (sum? a2))
+         (append a1 (cdr a2)))
+        ((sum? a1)
+         (append a1 (list a2)))
+        ((sum? a2)
+         (append (list '+ a1) (cdr a2)))
         (else
           (list '+ a1 a2))))
 
@@ -49,6 +55,12 @@
         ((=number? m2 1) m1)
         ((and (number? m1) (number? m2))
          (* m1 m2))
+        ((and (product? m1) (product? m2))
+         (append m1 (cdr m2)))
+        ((product? m1)
+         (append m1 (list m2)))
+        ((product? m2)
+         (append (list '* m1) (cdr m2)))
         (else
           (list '* m1 m2))))
 
