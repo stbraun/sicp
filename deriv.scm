@@ -2,7 +2,7 @@
 
 ; Differentiate a given expression for a given variable.
 (define (deriv expr var)
-  (cond ((number? expr) 0)
+  (cond ((constant? expr) 0)
         ((variable? expr) 
          (if (same-variable? expr var) 1 0))
         ((sum? expr)
@@ -19,6 +19,9 @@
 
 ; For the representation of algebraic expressions lists are used.
 ; ex. (+ x 3)
+
+(define (constant? x)
+  (number? x))
 
 (define (variable? x)
   (symbol? x))
@@ -98,6 +101,7 @@
 (deriv '(+ x 3) 'x)
 
 (deriv '(+ x 3 x) 'x)
+(deriv '(+ x (+ 3 x)) 'x)
 (deriv '(+ (* 2 x) 3) 'x)
 
 (deriv '(* x y) 'x)
