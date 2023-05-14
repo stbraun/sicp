@@ -105,4 +105,6 @@
 (deriv '(* (* x y) (+ x 3)) 'x)
 (deriv '(* x y (+ x 3)) 'x)
 
+(deriv '(* (* 2 x x x) (* 3 x) 5) 'x)
+
 (deriv (deriv '(* x x x) 'x) 'x)
