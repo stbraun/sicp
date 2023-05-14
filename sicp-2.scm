@@ -589,7 +589,7 @@
            (check row col (cdr others)))))
   (check (caar positions) col (cdr positions)))
 
-(queens 4)
+(length (queens 8))
 
 ; ------------
 
