@@ -134,18 +134,37 @@
 
         (module+ test
                  (check-equal? (list->tree '( 1 3 5 7 9)) '(5 (1 () (3 () ())) (7 () (9 () ()))))
+                 )
+
+        ; -------------
+
+        ; Exercise 2.65
+
+        (define (union-set set1 set2)
+          (cond ((null? set1) set2)
+                ((null? set2) set1)
+                (else
+                  (let ((s1 (tree->list set1))
+                        (s2 (tree->list set2)))
+                    (list->tree (so:union-set s1 s2))))))
+
+        (module+ test
+                 (check-equal? (union-set '(1 () (2 () ())) '(3 (2 () ()) ())) '(2 (1 () ()) (3 () ())))
+                 )
+        
+        (define (intersection-set set1 set2)
+          (if (or (null? set1) (null? set2))
+            '()
+            (let ((s1 (tree->list set1))
+                  (s2 (tree->list set2)))
+              (list->tree (so:intersection-set s1 s2)))))
+
+        (module+ test
+                 (check-equal? (intersection-set '() '()) '())
+                 (check-equal? (intersection-set '() '(3 () ())) '())
+                 (check-equal? (intersection-set '(5 () ()) '()) '())
+                 (check-equal? (intersection-set '(5 (3 () ()) ()) '(7 (5 () ()) (8 () ()))) '(5 () ()))
+                 (check-equal? (intersection-set '(5 (3 () ()) (7 () ())) '(7 (5 () ()) (8 () ()))) '(5 () (7 () ())))
+                 )
+
         )
-
-; -------------
-
-; Exercise 2.65
-
-(define (union-set set1 set2)
-  (cond ((null? set1) set2)
-        ((null? set2) set1)
-        (else
-          (let ((s1 (tree->list set1))
-                (s2 (tree->list set2)))
-            (list->tree (so:union-set s1 s2))))))
-
-)
