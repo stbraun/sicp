@@ -150,5 +150,11 @@
                  (check-equal? (encode-symbol 'B sample-tree) '(1 0))
                  (check-equal? (encode-symbol 'C sample-tree) '(1 1 1))
                  (check-equal? (encode-symbol 'D sample-tree) '(1 1 0))
+
+                 (check-equal? (encode '(A D A B B C A) sample-tree) sample-message)
+
+                 (define msg '(B A D))
+                 (check-equal? (decode (encode msg sample-tree) sample-tree) msg)
                  )
+
         )
