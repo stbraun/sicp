@@ -97,8 +97,10 @@
                           (make-leaf-set (cdr pairs))))))
 
         (module+ test
-                 (check-equal? '() '())
-                 (check-equal? (make-leaf-set '((A 4) (B 2) (C 1) (D 1))) '((leaf D 1) (leaf C 1) (leaf B 2) (leaf A 4)))
+                 (define sample-pairs '((A 4) (B 2) (C 1) (D 1)))
+
+                 (check-equal? (make-leaf-set '()) '())
+                 (check-equal? (make-leaf-set sample-pairs) '((leaf D 1) (leaf C 1) (leaf B 2) (leaf A 4)))
                  )
 
         (module+ test
@@ -110,12 +112,12 @@
                                    (make-code-tree
                                      (make-leaf 'B 2)
                                      (make-code-tree
-                                       (make-leaf 'D 1)
-                                       (make-leaf 'C 1)))))
+                                       (make-leaf 'C 1)
+                                       (make-leaf 'D 1)))))
 
                  (define sample-message '( 0 1 1 0 0 1 0 1 0 1 1 1 0))
 
-                 (check-equal? (decode sample-message sample-tree) '(A D A B B C A))
+                 (check-equal? (decode sample-message sample-tree) '(A C A B B D A))
 
                  ; -------------
                  )
@@ -148,13 +150,32 @@
         (module+ test
                  (check-equal? (encode-symbol 'A sample-tree) '(0))
                  (check-equal? (encode-symbol 'B sample-tree) '(1 0))
-                 (check-equal? (encode-symbol 'C sample-tree) '(1 1 1))
-                 (check-equal? (encode-symbol 'D sample-tree) '(1 1 0))
+                 (check-equal? (encode-symbol 'C sample-tree) '(1 1 0))
+                 (check-equal? (encode-symbol 'D sample-tree) '(1 1 1))
 
-                 (check-equal? (encode '(A D A B B C A) sample-tree) sample-message)
+                 (check-equal? (encode '(A C A B B D A) sample-tree) sample-message)
 
                  (define msg '(B A D))
                  (check-equal? (decode (encode msg sample-tree) sample-tree) msg)
                  )
 
+        ; -------------
+
+        ; Exercise 2.69
+        ; build a Huffman tree from a list of symbol-frequency pairs.
+
+        (define (generate-huffman-tree pairs)
+          (successive-merge (make-leaf-set pairs)))
+
+        (define (successive-merge leafs)
+          (define (successive-merge-1 leafs)
+            ; (display "successive-merge-1: ") (display leafs) (newline)
+            (if (= (length leafs) 2) 
+              (make-code-tree (car leafs) (cadr leafs))
+              (make-code-tree (car leafs) (successive-merge-1 (cdr leafs)))))
+          (successive-merge-1 (reverse leafs)))
+
+        (module+ test
+                 (check-equal? (generate-huffman-tree sample-pairs) sample-tree)
+                 )
         )
