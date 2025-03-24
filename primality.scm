@@ -105,12 +105,13 @@
 
         (define (start-prime-test n start-time)
           (if (prime? n)
-            (report-prime n (- (runtime) start-time))))
+            (report-prime n (- (runtime) start-time)) (display "")))
 
         (define (report-prime n elapsed-time)
           (display n)
           (display "*** ")
           (display elapsed-time)
+          (display "ms")
           (newline))
 
         ; Write a procedure that checks the primality of consecutive odd integers in a specified range.
@@ -181,7 +182,7 @@
         (define (timed-prime-test2 n)
           (define (start-prime-test n start-time)
             (if (prime2? n)
-              (report-prime n (- (runtime) start-time))))
+              (report-prime n (- (runtime) start-time)) (display "")))
           (define (report-prime n elapsed-time)
             (display n)
             (display "*** ")
@@ -208,7 +209,7 @@
         (define (timed-prime-test3 n)
           (define (start-prime-test n start-time)
             (if (fast-prime? n 55)
-              (report-prime n (- (runtime) start-time))))
+              (report-prime n (- (runtime) start-time)) (display "")))
           (define (report-prime n elapsed-time)
             (display n)
             (display "*** ")
