@@ -2,6 +2,7 @@
 (module fibonacci racket
         (provide fib
                  fib-2r
+                 fib-tr
                  fib-i)
 
         ; recursive approach
