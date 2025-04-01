@@ -21,7 +21,7 @@
               (display n)
               (display " *** ")
               (display elapsed-time)
-              (display "msec")
+              (display "µsec")
               (display "  - ")
               (display message)
               (newline))
