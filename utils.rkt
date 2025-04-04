@@ -6,31 +6,22 @@
            timed-tests
            average)
 
-  (require sicp
-           rackunit)
-
-
   (define (square x)
     (*  x x))
+
+  (module+ test
+    (require rackunit)
+    (check-equal? (square 2) 4)
+    (check-equal? (square 3) 9)
+    (check-equal? (square 44) 1936))
 
   (define (expected ex act)
     (printf "~a =!= ~a\n" ex act))
 
   ; Measure runtime of a procedure.
-  (define (timed-test f n message)
-    (define (start-test n start-time)
-      (define (report-time n elapsed-time)
-        (display "n=")
-        (display n)
-        (display " *** ")
-        (display elapsed-time)
-        (display "µsec")
-        (display "  - ")
-        (display message)
-        (newline))
-      (if (f n)
-          (report-time n (- (runtime) start-time)) (display "")))
-    (start-test n (runtime)))
+  (define (timed-test f ns message)
+    (let-values ([(v cpu wall gc) (time-apply f ns)])
+      (printf "~a ~a: cpu= ~amsec, wall= ~a, gc= ~a~n" message ns cpu wall gc)))
 
   (define (timed-tests fs ps ms)
     (cond ((or (empty? fs) (empty? ps) (empty? ms)) "done")
@@ -39,8 +30,15 @@
 
   (module+ test
     (require "factorial.rkt")
-    (timed-tests (list factorial-r factorial-t) (list 7 7) (list "f-r" "f-t")))
+    (displayln "Time calls to factorial:")
+    (timed-tests (list factorial-r factorial-t factorial-i) (list '(33333) '(33333) '(33333)) (list "     recursive" "tail-recursive" "     iterative")))
 
     (define (average a b)
       (/ (+ a b) 2))
-    )
+
+    (module+ test
+      (require rackunit)
+      (check-equal? (average 2 4) 3)
+      (check-equal? (average 3 5) 4)
+      (check-equal? (average 44 66) 55))
+    ) ;; end module
