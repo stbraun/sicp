@@ -41,4 +41,37 @@
       (check-equal? (average 2 4) 3)
       (check-equal? (average 3 5) 4)
       (check-equal? (average 44 66) 55))
+
+    (define (minimum l)
+      (cond ((empty? l) 0)
+        ((empty? (rest l)) (first l))
+        (else (foldl min (first l) (rest l)))))
+
+    (module+ test
+      (require rackunit)
+      (check-equal? (minimum '(2 4 6)) 2)
+      (check-equal? (minimum '(8 5 7 3)) 3)
+      (check-equal? (minimum '(57 44 66 88)) 44))
+      
+    (define (maximum l)
+      (cond ((empty? l) 0)
+        ((empty? (rest l)) (first l))
+        (else (foldl max (first l) (rest l)))))
+
+    (module+ test
+      (require rackunit)
+      (check-equal? (maximum '(2 4 6)) 6)
+      (check-equal? (maximum '(8 5 7 3)) 8)
+      (check-equal? (maximum '(57 44 88 66)) 88))
+
+    (define (mean l)
+      (cond ((empty? l) 0)
+        ((empty? (rest l)) (first l))
+        (else (/ (foldl + 0 l) (length l)))))
+
+    (module+ test
+      (require rackunit)
+      (check-equal? (mean '(2 4 6)) 4)
+      (check-equal? (mean '(8 5 7 3)) 23/4)
+      (check-equal? (mean '(57 44 88 66)) 255/4))
     ) ;; end module
