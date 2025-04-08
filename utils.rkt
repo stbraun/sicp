@@ -3,6 +3,7 @@
   (provide square
            expected
            timed-test
+           timed-test-n
            timed-tests
            average
            minimum
@@ -27,9 +28,18 @@
       (printf "~a ~a: cpu= ~amsec, wall= ~a, gc= ~a~n" message ns cpu wall gc)))
 
   ; Measure runtime of a procedure by performing multiple runs.
+  ; Returns statistics of cpu time: (min mean max).
   (define (timed-test-n f ps n message)
-    (let-values ([(v cpu wall gc) (time-apply f ps)])
-      (printf "~a ~a: cpu= ~amsec, wall= ~a, gc= ~a~n" message ps cpu wall gc)))
+    ; Run a single test and return the performance data: (cpu wall gc)
+    (define (run f ps)
+      (let-values ([(v cpu wall gc) (time-apply f ps)])
+        (list cpu wall gc)))
+    (define (run-n f ps n)
+      (cond ((<= n 0) '())
+        (else (cons (run f ps) (run-n f ps (- n 1))))))
+    (let* ([results (run-n f ps n)]
+           [cpus (map car results)])
+      (list (minimum cpus) (mean cpus) (maximum cpus))))
 
   (define (timed-tests fs ps ms)
     (cond ((or (empty? fs) (empty? ps) (empty? ms)) "done")
