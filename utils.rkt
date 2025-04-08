@@ -4,7 +4,10 @@
            expected
            timed-test
            timed-tests
-           average)
+           average
+           minimum
+           maximum
+           mean)
 
   (define (square x)
     (*  x x))
@@ -22,6 +25,11 @@
   (define (timed-test f ns message)
     (let-values ([(v cpu wall gc) (time-apply f ns)])
       (printf "~a ~a: cpu= ~amsec, wall= ~a, gc= ~a~n" message ns cpu wall gc)))
+
+  ; Measure runtime of a procedure by performing multiple runs.
+  (define (timed-test-n f ps n message)
+    (let-values ([(v cpu wall gc) (time-apply f ps)])
+      (printf "~a ~a: cpu= ~amsec, wall= ~a, gc= ~a~n" message ps cpu wall gc)))
 
   (define (timed-tests fs ps ms)
     (cond ((or (empty? fs) (empty? ps) (empty? ms)) "done")
