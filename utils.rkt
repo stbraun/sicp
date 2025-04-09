@@ -50,7 +50,7 @@
     (require rackunit
              "factorial.rkt")
     (define (test-cpu-stats)
-      (define test-args '(33333))
+      (define test-args '(13333))
       (define test-n 3)
       (define test-message "timed-test-n - cpu time")
       (let* ([results (timed-test-n factorial-t test-args test-n test-message)]
@@ -86,7 +86,7 @@
     (require rackunit
              "factorial.rkt")
     (displayln "timed-tests")
-    (timed-tests (list factorial-r factorial-t factorial-i) (list '(33333) '(33333) '(33333)) (list "     recursive" "tail-recursive" "     iterative")))
+    (timed-tests (list factorial-r factorial-t factorial-i) (list '(13333) '(13333) '(13333)) (list "     recursive" "tail-recursive" "     iterative")))
 
   (define (average a b)
     (/ (+ a b) 2))
@@ -113,31 +113,31 @@
       ((empty? (rest l)) (first l))
       (else (foldl max (first l) (rest l)))))
 
-    (module+ test
-      (require rackunit)
-      (check-equal? (maximum '(2 4 6)) 6)
-      (check-equal? (maximum '(8 5 7 3)) 8)
-      (check-equal? (maximum '(57 44 88 66)) 88))
+  (module+ test
+    (require rackunit)
+    (check-equal? (maximum '(2 4 6)) 6)
+    (check-equal? (maximum '(8 5 7 3)) 8)
+    (check-equal? (maximum '(57 44 88 66)) 88))
 
-    (define (mean l)
-      (cond ((empty? l) 0.0)
-        ((empty? (rest l)) (* 1.0 (first l)))
-        (else (/ (foldl + 0.0 l) (length l)))))
+  (define (mean l)
+    (cond ((empty? l) 0.0)
+      ((empty? (rest l)) (* 1.0 (first l)))
+      (else (/ (foldl + 0.0 l) (length l)))))
 
-    (module+ test
-      (require rackunit)
-      (check-equal? (mean '(2 4 6)) 4.0)
-      (check-equal? (mean '(8 5 7 3)) 5.75)
-      (check-equal? (mean '(57 44 88 66)) 63.75))
+  (module+ test
+    (require rackunit)
+    (check-equal? (mean '(2 4 6)) 4.0)
+    (check-equal? (mean '(8 5 7 3)) 5.75)
+    (check-equal? (mean '(57 44 88 66)) 63.75))
 
-; Format a number to a specified number of decimal places.
-(define (format-number num decimal-places)
-  (let ([multiplier (expt 10 decimal-places)])
-    (/ (round (* num multiplier)) multiplier)))
+  ; Format a number to a specified number of decimal places.
+  (define (format-number num decimal-places)
+    (let ([multiplier (expt 10 decimal-places)])
+      (/ (round (* num multiplier)) multiplier)))
     (module+ test
       (require rackunit)
       (check-equal? (format-number 3.14159 2) 3.14)
       (check-equal? (format-number 2.71828 3) 2.718)
       (check-equal? (format-number 1.61803 4) 1.6180))
 
-    ) ;; end module
+) ;; end module
