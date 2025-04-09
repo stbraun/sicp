@@ -4,11 +4,13 @@
            expected
            timed-test
            timed-test-n
+           print-statistics
            timed-tests
            average
            minimum
            maximum
-           mean)
+           mean
+           format-number)
 
   (define (square x)
     (*  x x))
@@ -28,12 +30,15 @@
       (printf "~a ~a: cpu= ~amsec, wall= ~a, gc= ~a~n" message ns cpu wall gc)))
 
   ; Measure runtime of a procedure by performing multiple runs.
-  ; Returns statistics of cpu time: (min mean max).
-  (define (timed-test-n f ps n message)
+  ; Returns statistics of cpu, wall, and gc times: 
+  ; ((min mean max)(min mean max)(min mean max)).
+  ; Times are in msec.
+  (define (timed-test-n f ps n)
     ; Run a single test and return the performance data: (cpu wall gc)
     (define (run f ps)
       (let-values ([(v cpu wall gc) (time-apply f ps)])
         (list cpu wall gc)))
+    ; Run the test n times and return a list of performance data: ((cpu wall gc) ...).
     (define (run-n f ps n)
       (cond ((<= n 0) '())
         (else (cons (run f ps) (run-n f ps (- n 1))))))
@@ -53,7 +58,7 @@
       (define test-args '(13333))
       (define test-n 3)
       (define test-message "timed-test-n - cpu time")
-      (let* ([results (timed-test-n factorial-t test-args test-n test-message)]
+      (let* ([results (timed-test-n factorial-t test-args test-n)]
              [cpu (first results)]
              [cmin (first cpu)]
              [cmean (second cpu)]
@@ -64,7 +69,7 @@
       (define test-args '(100))
       (define test-n 3)
       (define test-message "timed-test-n - wall time")
-      (let* ([results (timed-test-n test-func test-args test-n test-message)]
+      (let* ([results (timed-test-n test-func test-args test-n)]
              [wall (second results)]
              [wmin (first wall)]
              [wmean (second wall)]
@@ -75,6 +80,14 @@
         (check-true (>= wmax wmean))))
     (test-cpu-stats)
     (test-wall-stats))
+
+  ; Print statistics of test runs.
+  ; Expects a title and a list of statistics for cpu, wall, and gc times: ((min mean max) ...).
+  (define (print-statistics title stats)
+    (define (print-statistic type stat)
+      (printf "~a: min= ~amsec, mean= ~amsec, max= ~amsec~n" type (first stat) (format-number (second stat) 3) (third stat)))
+    (printf "----- ~a -----~n" title)
+    (for-each print-statistic (list " cpu" "wall" "  gc") stats))
 
   ; Measure runtimes of a list of procedures.
   (define (timed-tests fs ps ms)
