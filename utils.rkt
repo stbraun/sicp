@@ -52,13 +52,13 @@
     (define (test-cpu-stats)
       (define test-args '(33333))
       (define test-n 3)
-      (define test-message "timed-test-n - factorial-t")
+      (define test-message "timed-test-n - cpu time")
       (let* ([results (timed-test-n factorial-t test-args test-n test-message)]
              [cpu (first results)]
              [cmin (first cpu)]
              [cmean (second cpu)]
              [cmax (third cpu)])
-        (printf "~a cpu time statistics: min= ~amsec, mean= ~amsec, max= ~amsec~n" test-message cmin cmean cmax)))
+        (printf "~a cpu time statistics: min= ~amsec, mean= ~amsec, max= ~amsec~n" test-message cmin (format-number cmean 3) cmax)))
     (define (test-wall-stats)
       (define (test-func x) (sleep (* 0.001 x)))
       (define test-args '(100))
@@ -69,7 +69,7 @@
              [wmin (first wall)]
              [wmean (second wall)]
              [wmax (third wall)])
-        (printf "~a wall time statistics: min= ~amsec, mean= ~amsec, max= ~amsec~n" test-message wmin wmean wmax)
+        (printf "~a wall time statistics: min= ~amsec, mean= ~amsec, max= ~amsec~n" test-message wmin (format-number wmean 3) wmax)
         (check-true (>= wmin (first test-args)))
         (check-true (>= wmean wmin))
         (check-true (>= wmax wmean))))
@@ -120,13 +120,24 @@
       (check-equal? (maximum '(57 44 88 66)) 88))
 
     (define (mean l)
-      (cond ((empty? l) 0)
-        ((empty? (rest l)) (first l))
-        (else (/ (foldl + 0 l) (length l)))))
+      (cond ((empty? l) 0.0)
+        ((empty? (rest l)) (* 1.0 (first l)))
+        (else (/ (foldl + 0.0 l) (length l)))))
 
     (module+ test
       (require rackunit)
-      (check-equal? (mean '(2 4 6)) 4)
-      (check-equal? (mean '(8 5 7 3)) 23/4)
-      (check-equal? (mean '(57 44 88 66)) 255/4))
+      (check-equal? (mean '(2 4 6)) 4.0)
+      (check-equal? (mean '(8 5 7 3)) 5.75)
+      (check-equal? (mean '(57 44 88 66)) 63.75))
+
+; Format a number to a specified number of decimal places.
+(define (format-number num decimal-places)
+  (let ([multiplier (expt 10 decimal-places)])
+    (/ (round (* num multiplier)) multiplier)))
+    (module+ test
+      (require rackunit)
+      (check-equal? (format-number 3.14159 2) 3.14)
+      (check-equal? (format-number 2.71828 3) 2.718)
+      (check-equal? (format-number 1.61803 4) 1.6180))
+
     ) ;; end module
