@@ -38,43 +38,80 @@
       (cond ((<= n 0) '())
         (else (cons (run f ps) (run-n f ps (- n 1))))))
     (let* ([results (run-n f ps n)]
-           [cpus (map car results)])
-      (list (minimum cpus) (mean cpus) (maximum cpus))))
+           [cpus (map first results)]
+           [walls (map second results)]
+           [gcs (map third results)])
+      (list 
+          (list (minimum cpus) (mean cpus) (maximum cpus))
+          (list (minimum walls) (mean walls) (maximum walls))
+          (list (minimum gcs) (mean gcs) (maximum gcs)))))
 
+  (module+ test
+    (require rackunit
+             "factorial.rkt")
+    (define (test-cpu-stats)
+      (define test-args '(33333))
+      (define test-n 3)
+      (define test-message "timed-test-n - factorial-t")
+      (let* ([results (timed-test-n factorial-t test-args test-n test-message)]
+             [cpu (first results)]
+             [cmin (first cpu)]
+             [cmean (second cpu)]
+             [cmax (third cpu)])
+        (printf "~a cpu time statistics: min= ~amsec, mean= ~amsec, max= ~amsec~n" test-message cmin cmean cmax)))
+    (define (test-wall-stats)
+      (define (test-func x) (sleep (* 0.001 x)))
+      (define test-args '(100))
+      (define test-n 3)
+      (define test-message "timed-test-n - wall time")
+      (let* ([results (timed-test-n test-func test-args test-n test-message)]
+             [wall (second results)]
+             [wmin (first wall)]
+             [wmean (second wall)]
+             [wmax (third wall)])
+        (printf "~a wall time statistics: min= ~amsec, mean= ~amsec, max= ~amsec~n" test-message wmin wmean wmax)
+        (check-true (>= wmin (first test-args)))
+        (check-true (>= wmean wmin))
+        (check-true (>= wmax wmean))))
+    (test-cpu-stats)
+    (test-wall-stats))
+
+  ; Measure runtimes of a list of procedures.
   (define (timed-tests fs ps ms)
     (cond ((or (empty? fs) (empty? ps) (empty? ms)) "done")
       (else (timed-test (car fs) (car ps) (car ms))
             (timed-tests (cdr fs) (cdr ps) (cdr ms)))))
 
   (module+ test
-    (require "factorial.rkt")
-    (displayln "Time calls to factorial:")
+    (require rackunit
+             "factorial.rkt")
+    (displayln "timed-tests")
     (timed-tests (list factorial-r factorial-t factorial-i) (list '(33333) '(33333) '(33333)) (list "     recursive" "tail-recursive" "     iterative")))
 
-    (define (average a b)
-      (/ (+ a b) 2))
+  (define (average a b)
+    (/ (+ a b) 2))
 
-    (module+ test
-      (require rackunit)
-      (check-equal? (average 2 4) 3)
-      (check-equal? (average 3 5) 4)
-      (check-equal? (average 44 66) 55))
+  (module+ test
+    (require rackunit)
+    (check-equal? (average 2 4) 3)
+    (check-equal? (average 3 5) 4)
+    (check-equal? (average 44 66) 55))
 
-    (define (minimum l)
-      (cond ((empty? l) 0)
-        ((empty? (rest l)) (first l))
-        (else (foldl min (first l) (rest l)))))
+  (define (minimum l)
+    (cond ((empty? l) 0)
+      ((empty? (rest l)) (first l))
+      (else (foldl min (first l) (rest l)))))
 
-    (module+ test
-      (require rackunit)
-      (check-equal? (minimum '(2 4 6)) 2)
-      (check-equal? (minimum '(8 5 7 3)) 3)
-      (check-equal? (minimum '(57 44 66 88)) 44))
-      
-    (define (maximum l)
-      (cond ((empty? l) 0)
-        ((empty? (rest l)) (first l))
-        (else (foldl max (first l) (rest l)))))
+  (module+ test
+    (require rackunit)
+    (check-equal? (minimum '(2 4 6)) 2)
+    (check-equal? (minimum '(8 5 7 3)) 3)
+    (check-equal? (minimum '(57 44 66 88)) 44))
+
+  (define (maximum l)
+    (cond ((empty? l) 0)
+      ((empty? (rest l)) (first l))
+      (else (foldl max (first l) (rest l)))))
 
     (module+ test
       (require rackunit)
