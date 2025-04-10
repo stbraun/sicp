@@ -89,6 +89,17 @@
     (printf "----- ~a -----~n" title)
     (for-each print-statistic (list " cpu" "wall" "  gc") stats))
 
+  ; Measure runtime of a procedure in microseconds.
+  ; Calculate mean over multiple runs.
+  (define (timed-test-micros f ps n [warmup 1])
+    (for ([i (in-range warmup)])
+      (apply f ps))
+    (define start-time (current-inexact-monotonic-milliseconds))
+    (for ([i (in-range n)])
+      (apply f ps))
+    (let ([end-time (current-inexact-monotonic-milliseconds)])
+      (/ (* (- end-time start-time) 1000.0) n)))
+
   ; Measure runtimes of a list of procedures.
   (define (timed-tests fs ps ms)
     (cond ((or (empty? fs) (empty? ps) (empty? ms)) "done")
