@@ -10,7 +10,7 @@
            minimum
            maximum
            mean
-           format-number)
+           round-number)
 
   (define (square x)
     (*  x x))
@@ -63,7 +63,7 @@
              [cmin (first cpu)]
              [cmean (second cpu)]
              [cmax (third cpu)])
-        (printf "~a cpu time statistics: min= ~amsec, mean= ~amsec, max= ~amsec~n" test-message cmin (format-number cmean 3) cmax)))
+        (printf "~a cpu time statistics: min= ~amsec, mean= ~amsec, max= ~amsec~n" test-message cmin (round-number cmean 3) cmax)))
     (define (test-wall-stats)
       (define (test-func x) (sleep (* 0.001 x)))
       (define test-args '(100))
@@ -74,7 +74,7 @@
              [wmin (first wall)]
              [wmean (second wall)]
              [wmax (third wall)])
-        (printf "~a wall time statistics: min= ~amsec, mean= ~amsec, max= ~amsec~n" test-message wmin (format-number wmean 3) wmax)
+        (printf "~a wall time statistics: min= ~amsec, mean= ~amsec, max= ~amsec~n" test-message wmin (round-number wmean 3) wmax)
         (check-true (>= wmin (first test-args)))
         (check-true (>= wmean wmin))
         (check-true (>= wmax wmean))))
@@ -85,7 +85,7 @@
   ; Expects a title and a list of statistics for cpu, wall, and gc times: ((min mean max) ...).
   (define (print-statistics title stats)
     (define (print-statistic type stat)
-      (printf "~a: min= ~amsec, mean= ~amsec, max= ~amsec~n" type (first stat) (format-number (second stat) 3) (third stat)))
+      (printf "~a: min= ~amsec, mean= ~amsec, max= ~amsec~n" type (first stat) (round-number (second stat) 3) (third stat)))
     (printf "----- ~a -----~n" title)
     (for-each print-statistic (list " cpu" "wall" "  gc") stats))
 
@@ -98,7 +98,18 @@
     (for ([i (in-range n)])
       (apply f ps))
     (let ([end-time (current-inexact-monotonic-milliseconds)])
-      (/ (* (- end-time start-time) 1000.0) n)))
+      (round-number (/ (* (- end-time start-time) 1000.0) n) 3)))
+
+  (module+ test
+    (require rackunit
+             "factorial.rkt")
+    (define test-args '(13))
+    (define test-n 3)
+    (define test-message "timed-test-micros")
+    (let ([result (timed-test-micros factorial-t test-args test-n)])
+      (printf "~a: time= ~aµsec~n" test-message result)
+      (check-true (real? result))
+      (check-true (> result 0.0))))
 
   ; Measure runtimes of a list of procedures.
   (define (timed-tests fs ps ms)
@@ -155,13 +166,14 @@
     (check-equal? (mean '(57 44 88 66)) 63.75))
 
   ; Format a number to a specified number of decimal places.
-  (define (format-number num decimal-places)
+  (define (round-number num decimal-places)
     (let ([multiplier (expt 10 decimal-places)])
       (/ (round (* num multiplier)) multiplier)))
-    (module+ test
-      (require rackunit)
-      (check-equal? (format-number 3.14159 2) 3.14)
-      (check-equal? (format-number 2.71828 3) 2.718)
-      (check-equal? (format-number 1.61803 4) 1.6180))
+
+  (module+ test
+    (require rackunit)
+    (check-equal? (round-number 3.14159 2) 3.14)
+    (check-equal? (round-number 2.71828 3) 2.718)
+    (check-equal? (round-number 1.61803 4) 1.6180))
 
 ) ;; end module
