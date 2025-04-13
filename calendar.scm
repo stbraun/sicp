@@ -1,6 +1,12 @@
 ; Calendrical calculations.
 
 (module Calendar racket
+        (provide 
+                 easter
+                 day-of-week
+                 day-of-week-string
+                 leap-year?
+                 )
 
         ; Determine the easter date for a given year using Spencer's algorithm.
         ; https://de.wikipedia.org/wiki/Spencers_Osterformel
@@ -57,6 +63,18 @@
                  (check-equal? (day-of-week 25 12 2023) 'monday)
                  (check-equal? (day-of-week 4 7 2023) 'tuesday)
                  (check-equal? (day-of-week 12 4 2025) 'saturday))
+
+        ; Return the given day of week as a string.
+        (define (day-of-week-string day)
+          (cond
+            ((equal? day 'sunday) "Sunday")
+            ((equal? day 'monday) "Monday")
+            ((equal? day 'tuesday) "Tuesday")
+            ((equal? day 'wednesday) "Wednesday")
+            ((equal? day 'thursday) "Thursday")
+            ((equal? day 'friday) "Friday")
+            ((equal? day 'saturday) "Saturday")
+            (else "Invalid day")))
 
         ; True if the given year is a leap year.
         (define (leap-year? year)
