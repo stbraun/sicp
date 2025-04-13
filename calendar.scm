@@ -58,4 +58,20 @@
                  (check-equal? (day-of-week 4 7 2023) 'tuesday)
                  (check-equal? (day-of-week 12 4 2025) 'saturday))
 
+        ; True if the given year is a leap year.
+        (define (leap-year? year)
+          (or (and (= (modulo year 4) 0) (not (= (modulo year 100) 0)))
+              (= (modulo year 400) 0)))
+
+        (module+ test
+                 (require rackunit)
+                 (check-true (leap-year? 2000))
+                 (check-false (leap-year? 1700))
+                 (check-false (leap-year? 1800))
+                 (check-false (leap-year? 1900))
+                 (check-true (leap-year? 2020))
+                 (check-false (leap-year? 2021))
+                 (check-true (leap-year? 2024))
+                 (check-false (leap-year? 2025)))
+
         ) ; end module
