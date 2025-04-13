@@ -26,7 +26,7 @@ windows:
       layout: main-horizontal
       panes:
         - vim -S
-        - racket -i -p neil/sicp -l xrepl
+        - racket
   - shell:
       panes:
         - zsh
