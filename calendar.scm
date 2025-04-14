@@ -8,6 +8,19 @@
                  leap-year?
                  )
 
+        ; Define the days of the week as numbers.
+        (define sunday 0)
+        (define monday (+ sunday 1))
+        (define tuesday (+ monday 1))
+        (define wednesday (+ tuesday 1))
+        (define thursday (+ wednesday 1))
+        (define friday (+ thursday 1))
+        (define saturday (+ friday 1))
+
+        ; Define names for the days of the week.
+        (define days-of-week
+          (list "Sunday" "Monday" "Tuesday" "Wednesday" "Thursday" "Friday" "Saturday"))
+
         ; Determine the easter date for a given year using Spencer's algorithm.
         ; https://de.wikipedia.org/wiki/Spencers_Osterformel
         (define (easter year)
@@ -51,30 +64,35 @@
           (define c (quotient year-fixed 100))
           (define wd (modulo (- (+ day (floor (- (* 13/5 m-julian) 1/5)) y (quotient y 4) (quotient c 4)) (* 2 c)) 7))  
           ;; Return the day of the week as a symbol.
-          (list-ref (list 'sunday 'monday 'tuesday 'wednesday 'thursday 'friday 'saturday) wd))
+          wd)
 
         (module+ test
                  (require rackunit)
-                 (check-equal? (day-of-week 1 1 1900) 'monday)
-                 (check-equal? (day-of-week 4 2 1900) 'sunday)
-                 (check-equal? (day-of-week 4 6 2006) 'sunday)
-                 (check-equal? (day-of-week 12 6 2006) 'monday)
-                 (check-equal? (day-of-week 1 1 2023) 'sunday)
-                 (check-equal? (day-of-week 25 12 2023) 'monday)
-                 (check-equal? (day-of-week 4 7 2023) 'tuesday)
-                 (check-equal? (day-of-week 12 4 2025) 'saturday))
+                 (check-equal? (day-of-week 1 1 1900) monday)
+                 (check-equal? (day-of-week 4 2 1900) sunday)
+                 (check-equal? (day-of-week 4 6 2006) sunday)
+                 (check-equal? (day-of-week 12 6 2006) monday)
+                 (check-equal? (day-of-week 1 1 2023) sunday)
+                 (check-equal? (day-of-week 25 12 2023) monday)
+                 (check-equal? (day-of-week 4 7 2023) tuesday)
+                 (check-equal? (day-of-week 12 4 2025) saturday))
 
         ; Return the given day of week as a string.
         (define (day-of-week-string day)
-          (cond
-            ((equal? day 'sunday) "Sunday")
-            ((equal? day 'monday) "Monday")
-            ((equal? day 'tuesday) "Tuesday")
-            ((equal? day 'wednesday) "Wednesday")
-            ((equal? day 'thursday) "Thursday")
-            ((equal? day 'friday) "Friday")
-            ((equal? day 'saturday) "Saturday")
-            (else "Invalid day")))
+          (if (or (< day sunday) (> day saturday))
+              (error "Invalid day of week")
+              ; Use a cond statement to return the corresponding string.
+              (list-ref days-of-week day)))
+
+        (module+ test
+                 (require rackunit)
+                 (check-equal? (day-of-week-string sunday) "Sunday")
+                 (check-equal? (day-of-week-string monday) "Monday")
+                 (check-equal? (day-of-week-string tuesday) "Tuesday")
+                 (check-equal? (day-of-week-string wednesday) "Wednesday")
+                 (check-equal? (day-of-week-string thursday) "Thursday")
+                 (check-equal? (day-of-week-string friday) "Friday")
+                 (check-equal? (day-of-week-string saturday) "Saturday"))
 
         ; True if the given year is a leap year.
         (define (leap-year? year)
