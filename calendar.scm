@@ -1,16 +1,25 @@
 ; Calendrical calculations.
+; This module provides functions for calculating dates, day of the week,
+; leap years, and holidays in the Gregorian calendar.
+; The Gregorian calendar is the calendar used in most of the world today.
+; It was introduced by Pope Gregory XIII in 1582 and is a modification of the Julian calendar.
+; The Gregorian calendar is a solar calendar with 12 months of 28 to 31 days each.
+; The year is divided into 12 months, with 30 or 31 days in each month, except for February,
+
 
 (module Calendar racket
         (provide 
                  easter
                  day-of-week
+                 day-of-week-from-fixed
                  day-of-week-string
                  month-string
                  gregorian->fixed
                  fixed->gregorian
                  gregorian-date-difference
                  day-number
-                 days-in-future
+                 gregorian-date-n-days-from-date
+                 kday-on-or-before
                  leap-year?
                  )
 
@@ -25,7 +34,6 @@
         (define may (+ april 1))
         (define june (+ may 1))
         (define july (+ june 1))
-            
         (define august (+ july 1))
         (define september (+ august 1))
         (define october (+ september 1))
@@ -38,6 +46,9 @@
                 "July" "August" "September" "October" "November" "December"))
 
         ; Return the given month as a string.
+        ; The months of the year are defined as numbers from 1 (January) to 12 (December).
+        ; The function checks if the given month is valid and returns the corresponding string.
+        ; If the month is invalid, an error is raised.
         (define (month-string month)
           (if (or (< month january) (> month december))
               (error "Invalid month")
@@ -73,6 +84,9 @@
           (list "Sunday" "Monday" "Tuesday" "Wednesday" "Thursday" "Friday" "Saturday"))
 
         ; Return the given day of week as a string.
+        ; The days of the week are defined as numbers from 0 (Sunday) to 6 (Saturday).
+        ; The function checks if the given day is valid and returns the corresponding string.
+        ; If the day is invalid, an error is raised.
         (define (day-of-week-string day)
           (if (or (< day sunday) (> day saturday))
               (error "Invalid day of week")
@@ -89,8 +103,10 @@
                  (check-equal? (day-of-week-string friday) "Friday")
                  (check-equal? (day-of-week-string saturday) "Saturday"))
 
-        ; Determine the day of week for a given date using Zeller's algorithm.
+        ; Determine the day of week for a given date.
         ; https://de.wikipedia.org/wiki/Wochentagsberechnung
+        ; The day of the week is calculated as a number from 0 (Sunday) to 6 (Saturday).
+        ; The formula is based on Zeller's Congruence.
         (define (day-of-week day month year)
           ; Adjust month and year for Zeller's algorithm 
           (define m-julian (if (< month 3) (+ month 10) (- month 2)))
@@ -113,6 +129,9 @@
                  (check-equal? (day-of-week 12 4 2025) saturday))
 
         ; True if the given year is a leap year.
+        ; A year is a leap year if it is divisible by 4, but not divisible by 100,
+        ; unless it is also divisible by 400.:w
+        ; https://en.wikipedia.org/wiki/Leap_year#Gregorian_calendar
         (define (leap-year? year)
           (or (and (= (modulo year 4) 0) (not (= (modulo year 100) 0)))
               (= (modulo year 400) 0)))
@@ -129,6 +148,7 @@
                  (check-false (leap-year? 2025)))
 
         ; Gregorian date difference.
+        ; The difference between two Gregorian dates in days.
         (define (gregorian-date-difference day1 month1 year1 day2 month2 year2)
           (define fixed1 (gregorian->fixed day1 month1 year1))
           (define fixed2 (gregorian->fixed day2 month2 year2))
@@ -143,6 +163,7 @@
 
         ; Calculate the ordinal day number of a date within its year.
         ; The ordinal day number is the number of days since the beginning of the year.
+        ; The first day of the year is 1, the second day is 2, and so on.
         (define (day-number day month year)
           (gregorian-date-difference 31 12 (- year 1) day month year))
         (module+ test
@@ -164,6 +185,8 @@
                  (check-equal? (day-number 13 3 2001) 72))
 
         ; Calculate the remaining days in the year from a given date.
+        ; The remaining days are the difference between the given date and the last day of the year.
+        ; The last day of the year is always 31 December.
         (define (days-remaining day month year)
           (gregorian-date-difference day month year 31 12 year))
         (module+ test
@@ -182,22 +205,135 @@
                  (check-equal? (days-remaining 1 12 2000) 30))
 
         ; Determine the date a given number of days in the future.
-        (define (days-in-future day month year days)
+        ; The date is calculated by adding the number of days to the given date.
+        (define (gregorian-date-n-days-from-date day month year days)
           (define fixed-date (gregorian->fixed day month year))
           (define future-date (+ fixed-date days))
           (fixed->gregorian future-date))
         (module+ test
                  (require rackunit)
-                 (check-equal? (days-in-future 1 1 2000 1) '(2 1 2000))
-                 (check-equal? (days-in-future 1 1 2000 30) '(31 1 2000))
-                 (check-equal? (days-in-future 1 1 2000 60) '(1 3 2000))
-                 (check-equal? (days-in-future 1 1 2000 365) '(31 12 2000))
-                 (check-equal? (days-in-future 31 12 2000 -366) '(31 12 1999)))
+                 (check-equal? (gregorian-date-n-days-from-date 1 1 2000 1) '(2 1 2000))
+                 (check-equal? (gregorian-date-n-days-from-date 1 1 2000 30) '(31 1 2000))
+                 (check-equal? (gregorian-date-n-days-from-date 1 1 2000 60) '(1 3 2000))
+                 (check-equal? (gregorian-date-n-days-from-date 1 1 2000 365) '(31 12 2000))
+                 (check-equal? (gregorian-date-n-days-from-date 31 12 2000 -366) '(31 12 1999)))
+
+        ; Determine the k-th day of the week on or after a given date.
+        (define (day-of-week-from-fixed day-number)
+          (modulo day-number 7))
+
+        (module+ test
+                 (require rackunit)
+                 (check-equal? (day-of-week-from-fixed 1) monday)
+                 (check-equal? (day-of-week-from-fixed 2) tuesday)
+                 (check-equal? (day-of-week-from-fixed 3) wednesday)
+                 (check-equal? (day-of-week-from-fixed 4) thursday)
+                 (check-equal? (day-of-week-from-fixed 5) friday)
+                 (check-equal? (day-of-week-from-fixed 6) saturday)
+                 (check-equal? (day-of-week-from-fixed 7) sunday)
+                 (check-equal? (day-of-week-from-fixed (gregorian->fixed 4 2 1900)) sunday))
+
+        ; Determine the k-th day of the week on or before a given date.
+        ; Where k is the day of the week (0 = Sunday, 1 = Monday, ..., 6 = Saturday).
+        (define (kday-on-or-before day-number k)
+          (- day-number (day-of-week-from-fixed (- day-number k))))
+
+        (module+ test
+                 (require rackunit)
+                 (check-equal? (kday-on-or-before 1 sunday) 0)
+                 (check-equal? (kday-on-or-before 2 sunday) 0)
+                 (check-equal? (kday-on-or-before 3 sunday) 0)
+                 (check-equal? (kday-on-or-before 4 sunday) 0)
+                 (check-equal? (kday-on-or-before 5 sunday) 0)
+                 (check-equal? (kday-on-or-before 6 sunday) 0)
+                 (check-equal? (kday-on-or-before 7 sunday) 7)
+                 (check-equal? (kday-on-or-before 8 sunday) 7)
+                 (check-equal? (kday-on-or-before 9 sunday) 7)
+                 (check-equal? (kday-on-or-before 10 sunday) 7)
+                 (check-equal? (kday-on-or-before (gregorian->fixed 4 2 1900) wednesday) (gregorian->fixed 31 1 1900)))
+
+        ; Determine the k-th day of the week on or after a given date.
+        ; Where k is the day of the week (0 = Sunday, 1 = Monday, ..., 6 = Saturday).
+        (define (kday-on-or-after day-number k)
+          (kday-on-or-before (+ day-number 6) k))
+
+        (module+ test
+                 (require rackunit)
+                 (check-equal? (kday-on-or-after 1 sunday) 7)
+                 (check-equal? (kday-on-or-after 2 sunday) 7)
+                 (check-equal? (kday-on-or-after 3 sunday) 7)
+                 (check-equal? (kday-on-or-after 4 sunday) 7)
+                 (check-equal? (kday-on-or-after 5 sunday) 7)
+                 (check-equal? (kday-on-or-after 6 sunday) 7)
+                 (check-equal? (kday-on-or-after 7 sunday) 7)
+                 (check-equal? (kday-on-or-after 8 sunday) 14)
+                 (check-equal? (kday-on-or-after 9 sunday) 14)
+                 (check-equal? (kday-on-or-after 10 sunday) 14)
+                 (check-equal? (kday-on-or-after (gregorian->fixed 4 2 1900) wednesday) (gregorian->fixed 7 2 1900)))
+
+        ; Determine the k-th day of the week before a given date.
+        ; Where k is the day of the week (0 = Sunday, 1 = Monday, ..., 6 = Saturday).
+        (define (kday-before day-number k)
+          (kday-on-or-before (- day-number 1) k))
+
+        (module+ test
+                 (require rackunit)
+                 (check-equal? (kday-before 1 sunday) 0)
+                 (check-equal? (kday-before 2 sunday) 0)
+                 (check-equal? (kday-before 3 sunday) 0)
+                 (check-equal? (kday-before 4 sunday) 0)
+                 (check-equal? (kday-before 5 sunday) 0)
+                 (check-equal? (kday-before 6 sunday) 0)
+                 (check-equal? (kday-before 7 sunday) 0)
+                 (check-equal? (kday-before 8 sunday) 7)
+                 (check-equal? (kday-before 9 sunday) 7)
+                 (check-equal? (kday-before 10 sunday) 7)
+                 (check-equal? (kday-before (gregorian->fixed 4 2 1900) wednesday) (gregorian->fixed 31 1 1900)))
+
+        ; Determine the k-th day of the week after a given date.
+        ; Where k is the day of the week (0 = Sunday, 1 = Monday, ..., 6 = Saturday).
+        (define (kday-after day-number k)
+          (kday-on-or-before (+ day-number 7) k))
+
+        (module+ test
+                 (require rackunit)
+                 (check-equal? (kday-after 1 sunday) 7)
+                 (check-equal? (kday-after 2 sunday) 7)
+                 (check-equal? (kday-after 3 sunday) 7)
+                 (check-equal? (kday-after 4 sunday) 7)
+                 (check-equal? (kday-after 5 sunday) 7)
+                 (check-equal? (kday-after 6 sunday) 7)
+                 (check-equal? (kday-after 7 sunday) 14)
+                 (check-equal? (kday-after 8 sunday) 14)
+                 (check-equal? (kday-after 9 sunday) 14)
+                 (check-equal? (kday-after 10 sunday) 14)
+                 (check-equal? (kday-after (gregorian->fixed 4 2 1900) wednesday) (gregorian->fixed 7 2 1900)))
+
+        ; Determine the k-th day of the week nearest a given date.
+        ; Where k is the day of the week (0 = Sunday, 1 = Monday, ..., 6 = Saturday).
+        (define (kday-nearest day-number k)
+          (kday-on-or-before (+ day-number 3) k))
+
+        (module+ test
+                 (require rackunit)
+                 (check-equal? (kday-nearest 1 sunday) 0)
+                 (check-equal? (kday-nearest 2 sunday) 0)
+                 (check-equal? (kday-nearest 3 sunday) 0)
+                 (check-equal? (kday-nearest 4 sunday) 7)
+                 (check-equal? (kday-nearest 5 sunday) 7)
+                 (check-equal? (kday-nearest 6 sunday) 7)
+                 (check-equal? (kday-nearest 7 sunday) 7)
+                 (check-equal? (kday-nearest 8 sunday) 7)
+                 (check-equal? (kday-nearest 9 sunday) 7)
+                 (check-equal? (kday-nearest 10 sunday) 7)
+                 (check-equal? (kday-nearest 11 sunday) 14)
+                 (check-equal? (kday-nearest (gregorian->fixed 4 2 1900) wednesday) (gregorian->fixed 7 2 1900)))
 
         ;; ----- conversions -----
 
         ; Convert a Gregorian date to the fixed number of days since the Gregorian epoch.
         ; Calendrical Calculations pg. 51
+        ; The fixed day number is the number of days since the Gregorian epoch.
         (define (gregorian->fixed day month year)
           (+ (- gregorian-epoch 1)                 ; days before the epoch of the calendar
              (* 365 (- year 1))                    ; days in the years before the current year 
@@ -221,6 +357,7 @@
 
         ; Convert a fixed day number to a Gregorian date.
         ; Calendrical Calculations pg. 52ff
+        ; The fixed day number is the number of days since the Gregorian epoch.
         (define (fixed->gregorian day-number)
           (define (gregorian-year-from-fixed day-num)
             (define d0 (- day-num gregorian-epoch))
@@ -255,7 +392,7 @@
 
         ;; ----- holidays -----
 
-        ; Determine the easter date for a given year using Spencer's algorithm.
+        ; Determine the easter sunday date for a given year using Spencer's algorithm.
         ; https://de.wikipedia.org/wiki/Spencers_Osterformel
         (define (easter year)
           (define a (modulo year 19))
