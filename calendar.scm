@@ -12,6 +12,9 @@
                  easter-sunday
                  good-friday
                  easter-monday
+                 palm-sunday
+                 whit-sunday
+                 whit-monday
                  day-of-week
                  day-of-week-from-fixed
                  day-of-week-string
@@ -460,5 +463,56 @@
                  (check-equal? (easter-monday 2024) '(1 4 2024))
                  (check-equal? (easter-monday 2025) '(21 4 2025))
                  (check-equal? (easter-monday 2026) '(6 4 2026)))
+
+        ; Determine the date of palm sunday for a given year.
+        ; Palm Sunday is the Sunday before Easter Sunday.
+        (define (palm-sunday year)
+          (define easter-date (easter-sunday year))
+          (fixed->gregorian
+           (- (gregorian->fixed (car easter-date) (cadr easter-date) (caddr easter-date)) 7))) ; Subtract 7 days from Easter Sunday
+
+        (module+ test
+                 (require rackunit)
+                 (check-equal? (palm-sunday 2000) '(16 4 2000))
+                 (check-equal? (palm-sunday 2021) '(28 3 2021))
+                 (check-equal? (palm-sunday 2022) '(10 4 2022))
+                 (check-equal? (palm-sunday 2023) '(2 4 2023))
+                 (check-equal? (palm-sunday 2024) '(24 3 2024))
+                 (check-equal? (palm-sunday 2025) '(13 4 2025))
+                 (check-equal? (palm-sunday 2026) '(29 3 2026)))
+
+        ; Determine the date of whit sunday for a given year.
+        ; Whit Sunday is the 7th Sunday after Easter Sunday.
+        (define (whit-sunday year)
+          (define easter-date (easter-sunday year))
+          (fixed->gregorian
+           (+ (gregorian->fixed (car easter-date) (cadr easter-date) (caddr easter-date)) 49))) ; Add 49 days to Easter Sunday
+
+        (module+ test
+                 (require rackunit)
+                 (check-equal? (whit-sunday 2000) '(11 6 2000))
+                 (check-equal? (whit-sunday 2021) '(23 5 2021))
+                 (check-equal? (whit-sunday 2022) '(5 6 2022))
+                 (check-equal? (whit-sunday 2023) '(28 5 2023))
+                 (check-equal? (whit-sunday 2024) '(19 5 2024))
+                 (check-equal? (whit-sunday 2025) '(8 6 2025))
+                 (check-equal? (whit-sunday 2026) '(24 5 2026)))
+
+        ; Determine the date of whit monday for a given year.
+        ; Whit Monday is the day after Whit Sunday.
+        (define (whit-monday year)
+          (define whit-date (whit-sunday year))
+          (fixed->gregorian
+           (+ (gregorian->fixed (car whit-date) (cadr whit-date) (caddr whit-date)) 1))) ; Add 1 day to Whit Sunday
+
+        (module+ test
+                 (require rackunit)
+                 (check-equal? (whit-monday 2000) '(12 6 2000))
+                 (check-equal? (whit-monday 2021) '(24 5 2021))
+                 (check-equal? (whit-monday 2022) '(6 6 2022))
+                 (check-equal? (whit-monday 2023) '(29 5 2023))
+                 (check-equal? (whit-monday 2024) '(20 5 2024))
+                 (check-equal? (whit-monday 2025) '(9 6 2025))
+                 (check-equal? (whit-monday 2026) '(25 5 2026)))
 
         ) ; end module
