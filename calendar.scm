@@ -9,7 +9,9 @@
 
 (module Calendar racket
         (provide 
-                 easter
+                 easter-sunday
+                 good-friday
+                 easter-monday
                  day-of-week
                  day-of-week-from-fixed
                  day-of-week-string
@@ -161,7 +163,7 @@
                  (check-equal? (gregorian-date-difference 1 1 2000 1 1 2020) 7305)
                  (check-equal? (gregorian-date-difference 1 1 2000 1 1 2024) 8766))
 
-        ; Calculate the ordinal day number of a date within its year.
+        ; Calculate the ordinal day number (R.D.) of a date within its year.
         ; The ordinal day number is the number of days since the beginning of the year.
         ; The first day of the year is 1, the second day is 2, and so on.
         (define (day-number day month year)
@@ -394,7 +396,7 @@
 
         ; Determine the easter sunday date for a given year using Spencer's algorithm.
         ; https://de.wikipedia.org/wiki/Spencers_Osterformel
-        (define (easter year)
+        (define (easter-sunday year)
           (define a (modulo year 19))
           (define b (quotient year 100))
           (define c (modulo year 100))
@@ -417,12 +419,46 @@
 
         (module+ test
                  (require rackunit)
-                 (check-equal? (easter 2000) '(23 4 2000))
-                 (check-equal? (easter 2021) '(4 4 2021))
-                 (check-equal? (easter 2022) '(17 4 2022))
-                 (check-equal? (easter 2023) '(9 4 2023))
-                 (check-equal? (easter 2024) '(31 3 2024))
-                 (check-equal? (easter 2025) '(20 4 2025))
-                 (check-equal? (easter 2026) '(5 4 2026)))
+                 (check-equal? (easter-sunday 2000) '(23 4 2000))
+                 (check-equal? (easter-sunday 2021) '(4 4 2021))
+                 (check-equal? (easter-sunday 2022) '(17 4 2022))
+                 (check-equal? (easter-sunday 2023) '(9 4 2023))
+                 (check-equal? (easter-sunday 2024) '(31 3 2024))
+                 (check-equal? (easter-sunday 2025) '(20 4 2025))
+                 (check-equal? (easter-sunday 2026) '(5 4 2026)))
+
+        ; Determine the good friday date for a given year.
+        ; Good Friday is the Friday before Easter Sunday.
+        (define (good-friday year)
+          (define easter-date (easter-sunday year))
+          (fixed->gregorian
+           (- (gregorian->fixed (car easter-date) (cadr easter-date) (caddr easter-date)) 2))) ; Subtract 2 days from Easter Sunday
+
+        (module+ test
+                 (require rackunit)
+                 (check-equal? (good-friday 2000) '(21 4 2000))
+                 (check-equal? (good-friday 2021) '(2 4 2021))
+                 (check-equal? (good-friday 2022) '(15 4 2022))
+                 (check-equal? (good-friday 2023) '(7 4 2023))
+                 (check-equal? (good-friday 2024) '(29 3 2024))
+                 (check-equal? (good-friday 2025) '(18 4 2025))
+                 (check-equal? (good-friday 2026) '(3 4 2026)))
+
+        ; Determine the easter monday date for a given year.
+        ; Easter Monday is the Monday after Easter Sunday.
+        (define (easter-monday year)
+          (define easter-date (easter-sunday year))
+          (fixed->gregorian
+           (+ (gregorian->fixed (car easter-date) (cadr easter-date) (caddr easter-date)) 1))) ; Add 1 days to Easter Sunday
+
+        (module+ test
+                 (require rackunit)
+                 (check-equal? (easter-monday 2000) '(24 4 2000))
+                 (check-equal? (easter-monday 2021) '(5 4 2021))
+                 (check-equal? (easter-monday 2022) '(18 4 2022))
+                 (check-equal? (easter-monday 2023) '(10 4 2023))
+                 (check-equal? (easter-monday 2024) '(1 4 2024))
+                 (check-equal? (easter-monday 2025) '(21 4 2025))
+                 (check-equal? (easter-monday 2026) '(6 4 2026)))
 
         ) ; end module
