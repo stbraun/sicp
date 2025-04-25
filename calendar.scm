@@ -22,9 +22,13 @@
                  gregorian->fixed
                  fixed->gregorian
                  gregorian-date-difference
-                 day-number
+                 day-number-in-year
                  gregorian-date-n-days-from-date
                  kday-on-or-before
+                 kday-on-or-after
+                 kday-before
+                 kday-after
+                 kday-nearest
                  leap-year?
                  )
 
@@ -169,25 +173,25 @@
         ; Calculate the ordinal day number (R.D.) of a date within its year.
         ; The ordinal day number is the number of days since the beginning of the year.
         ; The first day of the year is 1, the second day is 2, and so on.
-        (define (day-number day month year)
+        (define (day-number-in-year day month year)
           (gregorian-date-difference 31 12 (- year 1) day month year))
         (module+ test
                  (require rackunit)
-                 (check-equal? (day-number 1 1 2000) 1)
-                 (check-equal? (day-number 1 2 2000) 32)
-                 (check-equal? (day-number 1 3 2000) 61)
-                 (check-equal? (day-number 1 4 2000) 92)
-                 (check-equal? (day-number 1 5 2000) 122)
-                 (check-equal? (day-number 1 6 2000) 153)
-                 (check-equal? (day-number 1 7 2000) 183)
-                 (check-equal? (day-number 1 8 2000) 214)
-                 (check-equal? (day-number 1 9 2000) 245)
-                 (check-equal? (day-number 1 10 2000) 275)
-                 (check-equal? (day-number 1 11 2000) 306)
-                 (check-equal? (day-number 1 11 2000) 306)
-                 (check-equal? (day-number 1 1 2001) 1)        
-                 (check-equal? (day-number 1 3 2001) 60)        
-                 (check-equal? (day-number 13 3 2001) 72))
+                 (check-equal? (day-number-in-year 1 1 2000) 1)
+                 (check-equal? (day-number-in-year 1 2 2000) 32)
+                 (check-equal? (day-number-in-year 1 3 2000) 61)
+                 (check-equal? (day-number-in-year 1 4 2000) 92)
+                 (check-equal? (day-number-in-year 1 5 2000) 122)
+                 (check-equal? (day-number-in-year 1 6 2000) 153)
+                 (check-equal? (day-number-in-year 1 7 2000) 183)
+                 (check-equal? (day-number-in-year 1 8 2000) 214)
+                 (check-equal? (day-number-in-year 1 9 2000) 245)
+                 (check-equal? (day-number-in-year 1 10 2000) 275)
+                 (check-equal? (day-number-in-year 1 11 2000) 306)
+                 (check-equal? (day-number-in-year 1 12 2000) 336)
+                 (check-equal? (day-number-in-year 1 1 2001) 1)        
+                 (check-equal? (day-number-in-year 1 3 2001) 60)        
+                 (check-equal? (day-number-in-year 13 3 2001) 72))
 
         ; Calculate the remaining days in the year from a given date.
         ; The remaining days are the difference between the given date and the last day of the year.
