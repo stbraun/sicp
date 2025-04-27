@@ -30,6 +30,10 @@
                  kday-after
                  kday-nearest
                  leap-year?
+                 dst-start-de
+                 dst-end-de
+                 dst-start-us
+                 dst-end-us
                  )
 
         ; The Gregorian epoch is defined as 1 even though the Gregorian calendar was introduced in 1582.
@@ -123,7 +127,6 @@
           (define y (modulo year-fixed 100))
           (define c (quotient year-fixed 100))
           (define wd (modulo (- (+ day (floor (- (* 13/5 m-julian) 1/5)) y (quotient y 4) (quotient c 4)) (* 2 c)) 7))  
-          ;; Return the day of the week as a symbol.
           wd)
 
         (module+ test
@@ -337,6 +340,49 @@
                  (check-equal? (kday-nearest 10 sunday) 7)
                  (check-equal? (kday-nearest 11 sunday) 14)
                  (check-equal? (kday-nearest (gregorian->fixed 4 2 1900) wednesday) (gregorian->fixed 7 2 1900)))
+
+        ;; ----- daylight saving time -----
+
+        ; The start of DST in Germany for a given year.
+        ; Returns the Gregorian date.
+        (define (dst-start-de year)
+          (fixed->gregorian
+            (kday-before (gregorian->fixed 1 4 year) sunday)))
+
+        (module+ test
+                 (check-equal? (list 30 3 2025) (dst-start-de 2025))
+                 (check-equal? (list 31 3 2024) (dst-start-de 2024)))
+
+        ; The end of DST in Germany for a given year.
+        ; Returns the Gregorian date.
+        (define (dst-end-de year)
+          (fixed->gregorian
+            (kday-before (gregorian->fixed 1 11 year) sunday)))
+        
+        (module+ test
+                 (check-equal? (list 26 10 2025) (dst-end-de 2025))
+                 (check-equal? (list 27 10 2024) (dst-end-de 2024)))
+
+        ; The start of DST in the USA for a given year.
+        ; Returns the Gregorian date.
+        (define (dst-start-us year)
+          (fixed->gregorian
+            (kday-on-or-after (gregorian->fixed 1 4 year) sunday)))
+
+        (module+ test
+                 (check-equal? (list 6 4 2025) (dst-start-us 2025))
+                 (check-equal? (list 7 4 2024) (dst-start-us 2024)))
+
+        ; The end of DST in the USA for a given year.
+        ; Returns the Gregorian date.
+        (define (dst-end-us year)
+          (fixed->gregorian
+            (kday-before (gregorian->fixed 1 11 year) sunday)))
+        
+        (module+ test
+                 (check-equal? (list 26 10 2025) (dst-end-us 2025))
+                 (check-equal? (list 27 10 2024) (dst-end-us 2024)))
+
 
         ;; ----- conversions -----
 
