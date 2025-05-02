@@ -574,6 +574,10 @@
 
         (module+ test
                  (require rackunit)
+                 (check-equal? (advent 2024 1) '(1 12 2024))
+                 (check-equal? (advent 2024 2) '(8 12 2024))
+                 (check-equal? (advent 2024 3) '(15 12 2024))
+                 (check-equal? (advent 2024 4) '(22 12 2024))
                  (check-equal? (advent 2025 1) '(30 11 2025))
                  (check-equal? (advent 2025 2) '(7 12 2025))
                  (check-equal? (advent 2025 3) '(14 12 2025))
