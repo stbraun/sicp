@@ -15,6 +15,7 @@
                  palm-sunday
                  whit-sunday
                  whit-monday
+                 advent
                  day-of-week
                  day-of-week-from-fixed
                  day-of-week-string
@@ -564,5 +565,18 @@
                  (check-equal? (whit-monday 2024) '(20 5 2024))
                  (check-equal? (whit-monday 2025) '(9 6 2025))
                  (check-equal? (whit-monday 2026) '(25 5 2026)))
+
+        ; Determine the date of the advent days for a given year.
+        ; The function takes the integers 1 to 4 for the 1st to the 4th advent.
+        (define (advent year n)
+          (fixed->gregorian
+          (kday-on-or-before (- (gregorian->fixed 24 12 year) (* 7 (- 4 n))) sunday)))
+
+        (module+ test
+                 (require rackunit)
+                 (check-equal? (advent 2025 1) '(30 11 2025))
+                 (check-equal? (advent 2025 2) '(7 12 2025))
+                 (check-equal? (advent 2025 3) '(14 12 2025))
+                 (check-equal? (advent 2025 4) '(21 12 2025)))
 
         ) ; end module
