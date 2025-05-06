@@ -9,6 +9,14 @@
 
 (module Calendar racket
         (provide 
+                 gdate
+                 gdate-year
+                 gdate-month
+                 gdate-day
+                 gdate<
+                 gdate>=
+                 gdate=
+                 format-date
                  easter-sunday
                  good-friday
                  easter-monday
@@ -37,6 +45,74 @@
                  dst-end-us
                  )
 
+        ; The type describing a Gregorian date.
+        ; The date is represented as a structure with three fields: year, month, and day.
+        ; The year is an integer, the month is an integer from 1 to 12, and the day is an integer from 1 to 31.
+        ; The date structure is defined as follows:
+        (struct gdate (year month day) #:inspector #f)
+
+        ; Format a date as a string.
+        (define (format-date date)
+          (define month (gdate-month date))
+          (define day (gdate-day date))
+          (string-append (number->string (gdate-year date)) "-"
+                         (if (< month 10) "0" "") (number->string month) "-"
+                         (if (< day 10) "0" "") (number->string day)))
+
+        (module+ test
+                 (require rackunit)
+                 (check-equal? (format-date (gdate 2023 1 1)) "2023-01-01")
+                 (check-equal? (format-date (gdate 2023 12 31)) "2023-12-31")
+                 (check-equal? (format-date (gdate 2000 2 29)) "2000-02-29"))
+
+        ; Compare the given dates and return true if the first date is earlier.
+        (define (gdate< date1 date2)
+          (define year1 (gdate-year date1))
+          (define month1 (gdate-month date1))
+          (define day1 (gdate-day date1))
+          (define year2 (gdate-year date2))
+          (define month2 (gdate-month date2))
+          (define day2 (gdate-day date2))
+          (cond ((< year1 year2) #t)
+                ((and (= year1 year2) (< month1 month2)) #t)
+                ((and (= year1 year2) (= month1 month2) (< day1 day2)) #t)
+                (else #f)))
+
+        (module+ test
+                 (require rackunit)
+                 (check-true (gdate< (gdate 2000 1 1) (gdate 2000 1 2)))
+                 (check-false (gdate< (gdate 2000 1 2) (gdate 2000 1 1)))
+                 (check-true (gdate< (gdate 2000 1 1) (gdate 2000 2 1)))
+                 (check-false (gdate< (gdate 2000 2 1) (gdate 2000 1 1)))
+                 (check-true (gdate< (gdate 2000 1 1) (gdate 2001 1 1)))
+                 (check-false (gdate< (gdate 2001 1 1) (gdate 2000 1 1))))
+
+        ; Compare the given dates and return true if the first date is later or equal.
+        (define (gdate>= date1 date2)
+          (not (gdate< date1 date2)))
+        (module+ test
+                 (require rackunit)
+                 (check-true (gdate>= (gdate 2000 1 1) (gdate 2000 1 1)))
+                 (check-true (gdate>= (gdate 2000 1 2) (gdate 2000 1 1)))
+                 (check-false (gdate>= (gdate 2000 1 1) (gdate 2000 1 2)))
+                 (check-true (gdate>= (gdate 2000 2 1) (gdate 2000 1 1)))
+                 (check-false (gdate>= (gdate 2000 1 1) (gdate 2000 2 1)))
+                 (check-true (gdate>= (gdate 2001 1 1) (gdate 2000 1 1)))
+                 (check-false (gdate>= (gdate 2000 1 1) (gdate 2001 1 1))))
+
+        ; Compare the given dates and return true if they are equal.
+        (define (gdate= date1 date2)
+          (and (= (gdate-year date1) (gdate-year date2))
+               (= (gdate-month date1) (gdate-month date2))
+               (= (gdate-day date1) (gdate-day date2))))
+
+        (module+ test
+                 (require rackunit)
+                 (check-true (gdate= (gdate 2000 1 1) (gdate 2000 1 1)))
+                 (check-false (gdate= (gdate 2000 1 2) (gdate 2000 1 1)))
+                 (check-false (gdate= (gdate 2000 1 1) (gdate 2000 2 1)))
+                 (check-false (gdate= (gdate 2000 1 1) (gdate 2001 1 1))))
+        
         ; The Gregorian epoch is defined as 1 even though the Gregorian calendar was introduced in 1582.
         (define gregorian-epoch 1)
 
@@ -101,11 +177,11 @@
         ; The days of the week are defined as numbers from 0 (Sunday) to 6 (Saturday).
         ; The function checks if the given day is valid and returns the corresponding string.
         ; If the day is invalid, an error is raised.
-        (define (day-of-week-string day)
-          (if (or (< day sunday) (> day saturday))
+        (define (day-of-week-string dow)
+          (if (or (< dow sunday) (> dow saturday))
               (error "Invalid day of week")
               ; Use a cond statement to return the corresponding string.
-              (list-ref days-of-week day)))
+              (list-ref days-of-week dow)))
 
         (module+ test
                  (require rackunit)
@@ -121,25 +197,25 @@
         ; https://de.wikipedia.org/wiki/Wochentagsberechnung
         ; The day of the week is calculated as a number from 0 (Sunday) to 6 (Saturday).
         ; The formula is based on Zeller's Congruence.
-        (define (day-of-week day month year)
+        (define (day-of-week date)
           ; Adjust month and year for Zeller's algorithm 
-          (define m-julian (if (< month 3) (+ month 10) (- month 2)))
-          (define year-fixed (if (< month 3) (- year 1) year))
+          (define m-julian (if (< (gdate-month date) 3) (+ (gdate-month date) 10) (- (gdate-month date) 2)))
+          (define year-fixed (if (< (gdate-month date) 3) (- (gdate-year date) 1) (gdate-year date)))
           (define y (modulo year-fixed 100))
           (define c (quotient year-fixed 100))
-          (define wd (modulo (- (+ day (floor (- (* 13/5 m-julian) 1/5)) y (quotient y 4) (quotient c 4)) (* 2 c)) 7))  
+          (define wd (modulo (- (+ (gdate-day date) (floor (- (* 13/5 m-julian) 1/5)) y (quotient y 4) (quotient c 4)) (* 2 c)) 7))  
           wd)
 
         (module+ test
                  (require rackunit)
-                 (check-equal? (day-of-week 1 1 1900) monday)
-                 (check-equal? (day-of-week 4 2 1900) sunday)
-                 (check-equal? (day-of-week 4 6 2006) sunday)
-                 (check-equal? (day-of-week 12 6 2006) monday)
-                 (check-equal? (day-of-week 1 1 2023) sunday)
-                 (check-equal? (day-of-week 25 12 2023) monday)
-                 (check-equal? (day-of-week 4 7 2023) tuesday)
-                 (check-equal? (day-of-week 12 4 2025) saturday))
+                 (check-equal? (day-of-week (gdate 1900 1 1)) monday)
+                 (check-equal? (day-of-week (gdate 1900 2 4)) sunday)
+                 (check-equal? (day-of-week (gdate 2006 6 4)) sunday)
+                 (check-equal? (day-of-week (gdate 2006 6 12)) monday)
+                 (check-equal? (day-of-week (gdate 2023 1 1)) sunday)
+                 (check-equal? (day-of-week (gdate 2023 12 25)) monday)
+                 (check-equal? (day-of-week (gdate 2023 7 4)) tuesday)
+                 (check-equal? (day-of-week (gdate 2025 4 2)) wednesday))
 
         ; True if the given year is a leap year.
         ; A year is a leap year if it is divisible by 4, but not divisible by 100,
@@ -162,74 +238,77 @@
 
         ; Gregorian date difference.
         ; The difference between two Gregorian dates in days.
-        (define (gregorian-date-difference day1 month1 year1 day2 month2 year2)
-          (define fixed1 (gregorian->fixed day1 month1 year1))
-          (define fixed2 (gregorian->fixed day2 month2 year2))
+        (define (gregorian-date-difference date1 date2)
+          (define fixed1 (gregorian->fixed date1))
+          (define fixed2 (gregorian->fixed date2))
           (- fixed2 fixed1))
 
         (module+ test
                  (require rackunit)
-                 (check-equal? (gregorian-date-difference 1 1 2000 1 1 2001) 366)
-                 (check-equal? (gregorian-date-difference 1 1 2000 1 1 2002) 731)
-                 (check-equal? (gregorian-date-difference 1 1 2000 1 1 2020) 7305)
-                 (check-equal? (gregorian-date-difference 1 1 2000 1 1 2024) 8766))
+                 (check-equal? (gregorian-date-difference (gdate 2000 1 1) (gdate 2001 1 1)) 366)
+                 (check-equal? (gregorian-date-difference (gdate 2000 1 1) (gdate 2002 1 1)) 731)
+                 (check-equal? (gregorian-date-difference (gdate 2000 1 1) (gdate 2020 1 1)) 7305)
+                 (check-equal? (gregorian-date-difference (gdate 2000 1 1) (gdate 2024 1 1)) 8766))
 
         ; Calculate the ordinal day number (R.D.) of a date within its year.
         ; The ordinal day number is the number of days since the beginning of the year.
         ; The first day of the year is 1, the second day is 2, and so on.
-        (define (day-number-in-year day month year)
-          (gregorian-date-difference 31 12 (- year 1) day month year))
+        (define (day-number-in-year date)
+          (gregorian-date-difference (gdate (- (gdate-year date) 1) 12 31) date))
+
         (module+ test
                  (require rackunit)
-                 (check-equal? (day-number-in-year 1 1 2000) 1)
-                 (check-equal? (day-number-in-year 1 2 2000) 32)
-                 (check-equal? (day-number-in-year 1 3 2000) 61)
-                 (check-equal? (day-number-in-year 1 4 2000) 92)
-                 (check-equal? (day-number-in-year 1 5 2000) 122)
-                 (check-equal? (day-number-in-year 1 6 2000) 153)
-                 (check-equal? (day-number-in-year 1 7 2000) 183)
-                 (check-equal? (day-number-in-year 1 8 2000) 214)
-                 (check-equal? (day-number-in-year 1 9 2000) 245)
-                 (check-equal? (day-number-in-year 1 10 2000) 275)
-                 (check-equal? (day-number-in-year 1 11 2000) 306)
-                 (check-equal? (day-number-in-year 1 12 2000) 336)
-                 (check-equal? (day-number-in-year 1 1 2001) 1)        
-                 (check-equal? (day-number-in-year 1 3 2001) 60)        
-                 (check-equal? (day-number-in-year 13 3 2001) 72))
+                 (check-equal? (day-number-in-year (gdate 2000 1 1)) 1)
+                 (check-equal? (day-number-in-year (gdate 2000 2 1)) 32)
+                 (check-equal? (day-number-in-year (gdate 2000 3 1)) 61)
+                 (check-equal? (day-number-in-year (gdate 2000 4 1)) 92)
+                 (check-equal? (day-number-in-year (gdate 2000 5 1)) 122)
+                 (check-equal? (day-number-in-year (gdate 2000 6 1)) 153)
+                 (check-equal? (day-number-in-year (gdate 2000 7 1)) 183)
+                 (check-equal? (day-number-in-year (gdate 2000 8 1)) 214)
+                 (check-equal? (day-number-in-year (gdate 2000 9 1)) 245)
+                 (check-equal? (day-number-in-year (gdate 2000 10 1)) 275)
+                 (check-equal? (day-number-in-year (gdate 2000 11 1)) 306)
+                 (check-equal? (day-number-in-year (gdate 2000 12 1)) 336)
+                 (check-equal? (day-number-in-year (gdate 2001 1 1)) 1)      
+                 (check-equal? (day-number-in-year (gdate 2001 3 1)) 60)        
+                 (check-equal? (day-number-in-year (gdate 2001 3 13)) 72))
 
         ; Calculate the remaining days in the year from a given date.
         ; The remaining days are the difference between the given date and the last day of the year.
         ; The last day of the year is always 31 December.
-        (define (days-remaining day month year)
-          (gregorian-date-difference day month year 31 12 year))
+        (define (days-remaining date)
+          (gregorian-date-difference date (gdate (gdate-year date) 12 31)))
+
         (module+ test
                  (require rackunit)
-                 (check-equal? (days-remaining 1 1 2000) 365)
-                 (check-equal? (days-remaining 1 2 2000) 334)
-                 (check-equal? (days-remaining 1 3 2000) 305)
-                 (check-equal? (days-remaining 1 4 2000) 274)
-                 (check-equal? (days-remaining 1 5 2000) 244)
-                 (check-equal? (days-remaining 1 6 2000) 213)
-                 (check-equal? (days-remaining 1 7 2000) 183)
-                 (check-equal? (days-remaining 1 8 2000) 152)
-                 (check-equal? (days-remaining 1 9 2000) 121)
-                 (check-equal? (days-remaining 1 10 2000) 91)
-                 (check-equal? (days-remaining 1 11 2000) 60)
-                 (check-equal? (days-remaining 1 12 2000) 30))
+                 (check-equal? (days-remaining (gdate 2000 1 1)) 365)
+                 (check-equal? (days-remaining (gdate 2000 2 1)) 334)
+                 (check-equal? (days-remaining (gdate 2000 3 1)) 305)
+                 (check-equal? (days-remaining (gdate 2000 4 1)) 274)
+                 (check-equal? (days-remaining (gdate 2000 5 1)) 244)
+                 (check-equal? (days-remaining (gdate 2000 6 1)) 213)
+                 (check-equal? (days-remaining (gdate 2000 7 1)) 183)
+                 (check-equal? (days-remaining (gdate 2000 8 1)) 152)
+                 (check-equal? (days-remaining (gdate 2000 9 1)) 121)
+                 (check-equal? (days-remaining (gdate 2000 10 1)) 91)
+                 (check-equal? (days-remaining (gdate 2000 11 1)) 60)
+                 (check-equal? (days-remaining (gdate 2000 12 1)) 30))
 
         ; Determine the date a given number of days in the future.
         ; The date is calculated by adding the number of days to the given date.
-        (define (gregorian-date-n-days-from-date day month year days)
-          (define fixed-date (gregorian->fixed day month year))
+        (define (gregorian-date-n-days-from-date date days)
+          (define fixed-date (gregorian->fixed date))
           (define future-date (+ fixed-date days))
           (fixed->gregorian future-date))
+
         (module+ test
                  (require rackunit)
-                 (check-equal? (gregorian-date-n-days-from-date 1 1 2000 1) '(2 1 2000))
-                 (check-equal? (gregorian-date-n-days-from-date 1 1 2000 30) '(31 1 2000))
-                 (check-equal? (gregorian-date-n-days-from-date 1 1 2000 60) '(1 3 2000))
-                 (check-equal? (gregorian-date-n-days-from-date 1 1 2000 365) '(31 12 2000))
-                 (check-equal? (gregorian-date-n-days-from-date 31 12 2000 -366) '(31 12 1999)))
+                 (check-equal? (gregorian-date-n-days-from-date (gdate 2000 1 1) 1) (gdate 2000 1 2))
+                 (check-equal? (gregorian-date-n-days-from-date (gdate 2000 1 1) 30) (gdate 2000 1 31))
+                 (check-equal? (gregorian-date-n-days-from-date (gdate 2000 1 1) 60) (gdate 2000 3 1))
+                 (check-equal? (gregorian-date-n-days-from-date (gdate 2000 1 1) 365) (gdate 2000 12 31))
+                 (check-equal? (gregorian-date-n-days-from-date (gdate 2000 1 1) -366) (gdate 1998 12 31)))
 
         ; Determine the k-th day of the week on or after a given date.
         (define (day-of-week-from-fixed day-number)
@@ -244,10 +323,11 @@
                  (check-equal? (day-of-week-from-fixed 5) friday)
                  (check-equal? (day-of-week-from-fixed 6) saturday)
                  (check-equal? (day-of-week-from-fixed 7) sunday)
-                 (check-equal? (day-of-week-from-fixed (gregorian->fixed 4 2 1900)) sunday))
+                 (check-equal? (day-of-week-from-fixed (gregorian->fixed (gdate 1900 2 4))) sunday))
 
         ; Determine the k-th day of the week on or before a given date.
         ; Where k is the day of the week (0 = Sunday, 1 = Monday, ..., 6 = Saturday).
+        ; Returns the day number of the k-th day of the week on or before the given date.
         (define (kday-on-or-before day-number k)
           (- day-number (day-of-week-from-fixed (- day-number k))))
 
@@ -263,7 +343,7 @@
                  (check-equal? (kday-on-or-before 8 sunday) 7)
                  (check-equal? (kday-on-or-before 9 sunday) 7)
                  (check-equal? (kday-on-or-before 10 sunday) 7)
-                 (check-equal? (kday-on-or-before (gregorian->fixed 4 2 1900) wednesday) (gregorian->fixed 31 1 1900)))
+                 (check-equal? (kday-on-or-before (gregorian->fixed (gdate 1900 2 4)) wednesday) (gregorian->fixed (gdate 1900 1 31))))
 
         ; Determine the k-th day of the week on or after a given date.
         ; Where k is the day of the week (0 = Sunday, 1 = Monday, ..., 6 = Saturday).
@@ -282,7 +362,7 @@
                  (check-equal? (kday-on-or-after 8 sunday) 14)
                  (check-equal? (kday-on-or-after 9 sunday) 14)
                  (check-equal? (kday-on-or-after 10 sunday) 14)
-                 (check-equal? (kday-on-or-after (gregorian->fixed 4 2 1900) wednesday) (gregorian->fixed 7 2 1900)))
+                 (check-equal? (kday-on-or-after (gregorian->fixed (gdate 1900 2 4)) wednesday) (gregorian->fixed (gdate 1900 2 7))))
 
         ; Determine the k-th day of the week before a given date.
         ; Where k is the day of the week (0 = Sunday, 1 = Monday, ..., 6 = Saturday).
@@ -301,7 +381,7 @@
                  (check-equal? (kday-before 8 sunday) 7)
                  (check-equal? (kday-before 9 sunday) 7)
                  (check-equal? (kday-before 10 sunday) 7)
-                 (check-equal? (kday-before (gregorian->fixed 4 2 1900) wednesday) (gregorian->fixed 31 1 1900)))
+                 (check-equal? (kday-before (gregorian->fixed (gdate 1900 2 4)) wednesday) (gregorian->fixed (gdate 1900 1 31))))
 
         ; Determine the k-th day of the week after a given date.
         ; Where k is the day of the week (0 = Sunday, 1 = Monday, ..., 6 = Saturday).
@@ -320,7 +400,7 @@
                  (check-equal? (kday-after 8 sunday) 14)
                  (check-equal? (kday-after 9 sunday) 14)
                  (check-equal? (kday-after 10 sunday) 14)
-                 (check-equal? (kday-after (gregorian->fixed 4 2 1900) wednesday) (gregorian->fixed 7 2 1900)))
+                 (check-equal? (kday-after (gregorian->fixed (gdate 1900 2 4)) wednesday) (gregorian->fixed (gdate 1900 2 7))))
 
         ; Determine the k-th day of the week nearest a given date.
         ; Where k is the day of the week (0 = Sunday, 1 = Monday, ..., 6 = Saturday).
@@ -340,7 +420,7 @@
                  (check-equal? (kday-nearest 9 sunday) 7)
                  (check-equal? (kday-nearest 10 sunday) 7)
                  (check-equal? (kday-nearest 11 sunday) 14)
-                 (check-equal? (kday-nearest (gregorian->fixed 4 2 1900) wednesday) (gregorian->fixed 7 2 1900)))
+                 (check-equal? (kday-nearest (gregorian->fixed (gdate 1900 2 4)) wednesday) (gregorian->fixed (gdate 1900 2 7))))
 
         ;; ----- daylight saving time -----
 
@@ -348,41 +428,41 @@
         ; Returns the Gregorian date.
         (define (dst-start-de year)
           (fixed->gregorian
-            (kday-before (gregorian->fixed 1 4 year) sunday)))
+            (kday-before (gregorian->fixed (gdate year 4 1)) sunday)))
 
         (module+ test
-                 (check-equal? (list 30 3 2025) (dst-start-de 2025))
-                 (check-equal? (list 31 3 2024) (dst-start-de 2024)))
+                 (check-equal? (dst-start-de 2025) (gdate 2025 3 30))
+                 (check-equal? (dst-start-de 2024) (gdate 2024 3 31)))
 
         ; The end of DST in Germany for a given year.
         ; Returns the Gregorian date.
         (define (dst-end-de year)
           (fixed->gregorian
-            (kday-before (gregorian->fixed 1 11 year) sunday)))
+            (kday-before (gregorian->fixed (gdate year 11 1)) sunday)))
         
         (module+ test
-                 (check-equal? (list 26 10 2025) (dst-end-de 2025))
-                 (check-equal? (list 27 10 2024) (dst-end-de 2024)))
+                 (check-equal? (dst-end-de 2025) (gdate 2025 10 26))
+                 (check-equal? (dst-end-de 2024) (gdate 2024 10 27)))
 
         ; The start of DST in the USA for a given year.
         ; Returns the Gregorian date.
         (define (dst-start-us year)
           (fixed->gregorian
-            (kday-on-or-after (gregorian->fixed 1 4 year) sunday)))
+            (kday-on-or-after (gregorian->fixed (gdate year 4 1)) sunday)))
 
         (module+ test
-                 (check-equal? (list 6 4 2025) (dst-start-us 2025))
-                 (check-equal? (list 7 4 2024) (dst-start-us 2024)))
+                 (check-equal? (dst-start-us 2025) (gdate 2025 4 6))
+                 (check-equal? (dst-start-us 2024) (gdate 2024 4 7)))
 
         ; The end of DST in the USA for a given year.
         ; Returns the Gregorian date.
         (define (dst-end-us year)
           (fixed->gregorian
-            (kday-before (gregorian->fixed 1 11 year) sunday)))
+            (kday-before (gregorian->fixed (gdate year 11 1)) sunday)))
         
         (module+ test
-                 (check-equal? (list 26 10 2025) (dst-end-us 2025))
-                 (check-equal? (list 27 10 2024) (dst-end-us 2024)))
+                 (check-equal? (dst-end-us 2025) (gdate 2025 10 26))
+                 (check-equal? (dst-end-us 2024) (gdate 2024 10 27)))
 
 
         ;; ----- conversions -----
@@ -390,7 +470,10 @@
         ; Convert a Gregorian date to the fixed number of days since the Gregorian epoch.
         ; Calendrical Calculations pg. 51
         ; The fixed day number is the number of days since the Gregorian epoch.
-        (define (gregorian->fixed day month year)
+        (define (gregorian->fixed date)
+          (define year (gdate-year date))
+          (define month (gdate-month date))
+          (define day (gdate-day date))
           (+ (- gregorian-epoch 1)                 ; days before the epoch of the calendar
              (* 365 (- year 1))                    ; days in the years before the current year 
              (floor (/ (- year 1) 4))              ; consider leapyears
@@ -405,11 +488,11 @@
         (module+ test
                  (require rackunit)
                  ; See https://www.vcalc.com/equation/?uuid=9e167c54-77aa-11e5-a3bb-bc764e2038f2 for an RD calculator to get test data.
-                 (check-equal? (gregorian->fixed 1 1 1) 1)
-                 (check-equal? (gregorian->fixed 12 11 1945) 710347)
-                 (check-equal? (gregorian->fixed 29 10 1958) 715081)
-                 (check-equal? (gregorian->fixed 1 1 2000) 730120)
-                 (check-equal? (gregorian->fixed 15 4 2025) 739356))
+                 (check-equal? (gregorian->fixed (gdate 1 1 1)) 1)
+                 (check-equal? (gregorian->fixed (gdate 1945 11 12)) 710347)
+                 (check-equal? (gregorian->fixed (gdate 1958 10 29)) 715081)
+                 (check-equal? (gregorian->fixed (gdate 2000 1 1)) 730120)
+                 (check-equal? (gregorian->fixed (gdate 2025 4 15)) 739356))
 
         ; Convert a fixed day number to a Gregorian date.
         ; Calendrical Calculations pg. 52ff
@@ -429,22 +512,22 @@
               year
               (+ year 1)))
           (define year (gregorian-year-from-fixed day-number))
-          (define prior-days (- day-number (gregorian->fixed 1 1 year)))
-          (define correction (cond ((< day-number (gregorian->fixed 1 3 year)) 0)
-                                   ((and (leap-year? year) (>= day-number (gregorian->fixed 1 3 year))) 1)
+          (define prior-days (- day-number (gregorian->fixed (gdate year 1 1))))
+          (define correction (cond ((< day-number (gregorian->fixed (gdate year 3 1))) 0)
+                                   ((and (leap-year? year) (>= day-number (gregorian->fixed (gdate year 3 1)))) 1)
                                    (else 2)))
           (define month (quotient (+ (* 12 (+ prior-days correction)) 373) 367))
-          (define day (+ (- day-number (gregorian->fixed 1 month year)) 1))
-          `(,day ,month ,year)) ; Return the date as a list of the form '(day month year)
+          (define day (+ (- day-number (gregorian->fixed (gdate year month 1))) 1))
+          (gdate year month day))
 
         (module+ test
                  (require rackunit)
                  ; See https://www.vcalc.com/equation/?uuid=9e167c54-77aa-11e5-a3bb-bc764e2038f2 for an RD calculator to get test data.
-                 (check-equal? (fixed->gregorian 1) '(1 1 1))
-                 (check-equal? (fixed->gregorian 710347) '(12 11 1945))
-                 (check-equal? (fixed->gregorian 715081) '(29 10 1958))
-                 (check-equal? (fixed->gregorian 730120) '(1 1 2000))
-                 (check-equal? (fixed->gregorian 739356) '(15 4 2025)))
+                 (check-equal? (fixed->gregorian 1) (gdate 1 1 1))
+                 (check-equal? (fixed->gregorian 710347) (gdate 1945 11 12))
+                 (check-equal? (fixed->gregorian 715081) (gdate 1958 10 29))
+                 (check-equal? (fixed->gregorian 730120) (gdate 2000 1 1))
+                 (check-equal? (fixed->gregorian 739356) (gdate 2025 4 15)))
 
         ;; ----- holidays -----
 
@@ -467,120 +550,98 @@
           (define o (modulo (+ h l (- (* 7 m)) 114) 31))
           (define day (+ o 1))
           (define month n)
-          ;; Return the date of Easter Sunday
-          ;; as a list of the form '(month day year)
-          `(,day ,month ,year))
+          (gdate year month day))
 
         (module+ test
                  (require rackunit)
-                 (check-equal? (easter-sunday 2000) '(23 4 2000))
-                 (check-equal? (easter-sunday 2021) '(4 4 2021))
-                 (check-equal? (easter-sunday 2022) '(17 4 2022))
-                 (check-equal? (easter-sunday 2023) '(9 4 2023))
-                 (check-equal? (easter-sunday 2024) '(31 3 2024))
-                 (check-equal? (easter-sunday 2025) '(20 4 2025))
-                 (check-equal? (easter-sunday 2026) '(5 4 2026)))
+                 (check-equal? (easter-sunday 2000) (gdate 2000 4 23))
+                 (check-equal? (easter-sunday 2021) (gdate 2021 4 4))
+                 (check-equal? (easter-sunday 2022) (gdate 2022 4 17))
+                 (check-equal? (easter-sunday 2023) (gdate 2023 4 9))
+                 (check-equal? (easter-sunday 2024) (gdate 2024 3 31))
+                 (check-equal? (easter-sunday 2025) (gdate 2025 4 20))
+                 (check-equal? (easter-sunday 2026) (gdate 2026 4 5)))
 
         ; Determine the good friday date for a given year.
         ; Good Friday is the Friday before Easter Sunday.
         (define (good-friday year)
-          (define easter-date (easter-sunday year))
           (fixed->gregorian
-           (- (gregorian->fixed (car easter-date) (cadr easter-date) (caddr easter-date)) 2))) ; Subtract 2 days from Easter Sunday
+           (- (gregorian->fixed (easter-sunday year)) 2))) ; Subtract 2 days from Easter Sunday
 
         (module+ test
                  (require rackunit)
-                 (check-equal? (good-friday 2000) '(21 4 2000))
-                 (check-equal? (good-friday 2021) '(2 4 2021))
-                 (check-equal? (good-friday 2022) '(15 4 2022))
-                 (check-equal? (good-friday 2023) '(7 4 2023))
-                 (check-equal? (good-friday 2024) '(29 3 2024))
-                 (check-equal? (good-friday 2025) '(18 4 2025))
-                 (check-equal? (good-friday 2026) '(3 4 2026)))
+                 (check-equal? (good-friday 2000) (gdate 2000 4 21))
+                 (check-equal? (good-friday 2024) (gdate 2024 3 29))
+                 (check-equal? (good-friday 2025) (gdate 2025 4 18))
+                 (check-equal? (good-friday 2026) (gdate 2026 4 3)))
 
         ; Determine the easter monday date for a given year.
         ; Easter Monday is the Monday after Easter Sunday.
         (define (easter-monday year)
-          (define easter-date (easter-sunday year))
           (fixed->gregorian
-           (+ (gregorian->fixed (car easter-date) (cadr easter-date) (caddr easter-date)) 1))) ; Add 1 days to Easter Sunday
+           (+ (gregorian->fixed (easter-sunday year)) 1))) ; Add 1 days to Easter Sunday
 
         (module+ test
                  (require rackunit)
-                 (check-equal? (easter-monday 2000) '(24 4 2000))
-                 (check-equal? (easter-monday 2021) '(5 4 2021))
-                 (check-equal? (easter-monday 2022) '(18 4 2022))
-                 (check-equal? (easter-monday 2023) '(10 4 2023))
-                 (check-equal? (easter-monday 2024) '(1 4 2024))
-                 (check-equal? (easter-monday 2025) '(21 4 2025))
-                 (check-equal? (easter-monday 2026) '(6 4 2026)))
+                 (check-equal? (easter-monday 2000) (gdate 2000 4 24))
+                 (check-equal? (easter-monday 2024) (gdate 2024 4 1))
+                 (check-equal? (easter-monday 2025) (gdate 2025 4 21))
+                 (check-equal? (easter-monday 2026) (gdate 2026 4 6)))
 
         ; Determine the date of palm sunday for a given year.
         ; Palm Sunday is the Sunday before Easter Sunday.
         (define (palm-sunday year)
-          (define easter-date (easter-sunday year))
           (fixed->gregorian
-           (- (gregorian->fixed (car easter-date) (cadr easter-date) (caddr easter-date)) 7))) ; Subtract 7 days from Easter Sunday
+           (- (gregorian->fixed (easter-sunday year)) 7))) ; Subtract 7 days from Easter Sunday
 
         (module+ test
                  (require rackunit)
-                 (check-equal? (palm-sunday 2000) '(16 4 2000))
-                 (check-equal? (palm-sunday 2021) '(28 3 2021))
-                 (check-equal? (palm-sunday 2022) '(10 4 2022))
-                 (check-equal? (palm-sunday 2023) '(2 4 2023))
-                 (check-equal? (palm-sunday 2024) '(24 3 2024))
-                 (check-equal? (palm-sunday 2025) '(13 4 2025))
-                 (check-equal? (palm-sunday 2026) '(29 3 2026)))
+                 (check-equal? (palm-sunday 2000) (gdate 2000 4 16))
+                 (check-equal? (palm-sunday 2024) (gdate 2024 3 24))
+                 (check-equal? (palm-sunday 2025) (gdate 2025 4 13))
+                 (check-equal? (palm-sunday 2026) (gdate 2026 3 29)))
 
         ; Determine the date of whit sunday for a given year.
         ; Whit Sunday is the 7th Sunday after Easter Sunday.
         (define (whit-sunday year)
-          (define easter-date (easter-sunday year))
           (fixed->gregorian
-           (+ (gregorian->fixed (car easter-date) (cadr easter-date) (caddr easter-date)) 49))) ; Add 49 days to Easter Sunday
+           (+ (gregorian->fixed (easter-sunday year)) 49))) ; Add 49 days to Easter Sunday
 
         (module+ test
                  (require rackunit)
-                 (check-equal? (whit-sunday 2000) '(11 6 2000))
-                 (check-equal? (whit-sunday 2021) '(23 5 2021))
-                 (check-equal? (whit-sunday 2022) '(5 6 2022))
-                 (check-equal? (whit-sunday 2023) '(28 5 2023))
-                 (check-equal? (whit-sunday 2024) '(19 5 2024))
-                 (check-equal? (whit-sunday 2025) '(8 6 2025))
-                 (check-equal? (whit-sunday 2026) '(24 5 2026)))
+                 (check-equal? (whit-sunday 2000) (gdate 2000 6 11))
+                 (check-equal? (whit-sunday 2024) (gdate 2024 5 19))
+                 (check-equal? (whit-sunday 2025) (gdate 2025 6 8))
+                 (check-equal? (whit-sunday 2026) (gdate 2026 5 24)))
 
         ; Determine the date of whit monday for a given year.
         ; Whit Monday is the day after Whit Sunday.
         (define (whit-monday year)
-          (define whit-date (whit-sunday year))
           (fixed->gregorian
-           (+ (gregorian->fixed (car whit-date) (cadr whit-date) (caddr whit-date)) 1))) ; Add 1 day to Whit Sunday
+           (+ (gregorian->fixed (whit-sunday year)) 1))) ; Add 1 day to Whit Sunday
 
         (module+ test
                  (require rackunit)
-                 (check-equal? (whit-monday 2000) '(12 6 2000))
-                 (check-equal? (whit-monday 2021) '(24 5 2021))
-                 (check-equal? (whit-monday 2022) '(6 6 2022))
-                 (check-equal? (whit-monday 2023) '(29 5 2023))
-                 (check-equal? (whit-monday 2024) '(20 5 2024))
-                 (check-equal? (whit-monday 2025) '(9 6 2025))
-                 (check-equal? (whit-monday 2026) '(25 5 2026)))
+                 (check-equal? (whit-monday 2000) (gdate 2000 6 12))
+                 (check-equal? (whit-monday 2024) (gdate 2024 5 20))
+                 (check-equal? (whit-monday 2025) (gdate 2025 6 9))
+                 (check-equal? (whit-monday 2026) (gdate 2026 5 25)))
 
         ; Determine the date of the advent days for a given year.
         ; The function takes the integers 1 to 4 for the 1st to the 4th advent.
         (define (advent year n)
           (fixed->gregorian
-          (kday-on-or-before (- (gregorian->fixed 24 12 year) (* 7 (- 4 n))) sunday)))
+            (kday-on-or-before (- (gregorian->fixed (gdate year 12 24)) (* 7 (- 4 n))) sunday)))
 
         (module+ test
                  (require rackunit)
-                 (check-equal? (advent 2024 1) '(1 12 2024))
-                 (check-equal? (advent 2024 2) '(8 12 2024))
-                 (check-equal? (advent 2024 3) '(15 12 2024))
-                 (check-equal? (advent 2024 4) '(22 12 2024))
-                 (check-equal? (advent 2025 1) '(30 11 2025))
-                 (check-equal? (advent 2025 2) '(7 12 2025))
-                 (check-equal? (advent 2025 3) '(14 12 2025))
-                 (check-equal? (advent 2025 4) '(21 12 2025)))
+                 (check-equal? (advent 2024 1) (gdate 2024 12 1))
+                 (check-equal? (advent 2024 2) (gdate 2024 12 8))
+                 (check-equal? (advent 2024 3) (gdate 2024 12 15))
+                 (check-equal? (advent 2024 4) (gdate 2024 12 22))
+                 (check-equal? (advent 2025 1) (gdate 2025 11 30))
+                 (check-equal? (advent 2025 2) (gdate 2025 12 7))
+                 (check-equal? (advent 2025 3) (gdate 2025 12 14))
+                 (check-equal? (advent 2025 4) (gdate 2025 12 21)))
 
         ) ; end module
