@@ -32,6 +32,7 @@
                  fixed->gregorian
                  gregorian-date-difference
                  day-number-in-year
+                 week-of-year
                  gregorian-date-n-days-from-date
                  kday-on-or-before
                  kday-on-or-after
@@ -294,6 +295,28 @@
                  (check-equal? (days-remaining (gdate 2000 10 1)) 91)
                  (check-equal? (days-remaining (gdate 2000 11 1)) 60)
                  (check-equal? (days-remaining (gdate 2000 12 1)) 30))
+
+        ; Calculate the week number of a given date.
+        ; The week number is calculated as the number of weeks since the beginning of the year.
+        ; The first week of the year is the week containing the first Thursday of the year.
+        ; The week number is calculated as the difference between the given date and the first day of the year.
+        ; The first day of the year is always 1 January.
+        (define (week-of-year date)
+          (define first-day-of-year (gdate (gdate-year date) 1 1))
+          (define week-number (quotient (gregorian-date-difference first-day-of-year date) 7))
+          (if (< (day-number-in-year date) 4)
+              (- week-number 1)
+              week-number))
+        (module+ test
+                 (require rackunit)
+                 (check-equal? (week-of-year (gdate 2000 1 1)) 0)
+                 (check-equal? (week-of-year (gdate 2000 1 2)) 0)
+                 (check-equal? (week-of-year (gdate 2000 1 3)) 0)
+                 (check-equal? (week-of-year (gdate 2000 1 4)) 0)
+                 (check-equal? (week-of-year (gdate 2000 1 5)) 1)
+                 (check-equal? (week-of-year (gdate 2000 1 6)) 1)
+                 (check-equal? (week-of-year (gdate 2000 1 7)) 1)
+                 (check-equal? (week-of-year (gdate 2000 12 31)) 52))
 
         ; Determine the date a given number of days in the future.
         ; The date is calculated by adding the number of days to the given date.
