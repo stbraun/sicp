@@ -27,6 +27,7 @@
                  day-of-week
                  day-of-week-from-fixed
                  day-of-week-string
+                 day-of-week-short-string
                  month-string
                  gregorian->fixed
                  fixed->gregorian
@@ -173,6 +174,10 @@
         (define days-of-week
           (list "Sunday" "Monday" "Tuesday" "Wednesday" "Thursday" "Friday" "Saturday"))
 
+        ; Define short names for the days of the week.
+        (define days-of-week-short
+          (list "Sun" "Mon" "Tue" "Wed" "Thu" "Fri" "Sat"))
+
         ; Return the given day of week as a string.
         ; The days of the week are defined as numbers from 0 (Sunday) to 6 (Saturday).
         ; The function checks if the given day is valid and returns the corresponding string.
@@ -193,10 +198,31 @@
                  (check-equal? (day-of-week-string friday) "Friday")
                  (check-equal? (day-of-week-string saturday) "Saturday"))
 
+        ; Return the given day of week as a short string.
+        ; The days of the week are defined as numbers from 0 (Sun) to 6 (Sat).
+        ; The function checks if the given day is valid and returns the corresponding string.
+        ; If the day is invalid, an error is raised.
+        (define (day-of-week-short-string dow)
+          (if (or (< dow sunday) (> dow saturday))
+              (error "Invalid day of week")
+              ; Use a cond statement to return the corresponding string.
+              (list-ref days-of-week-short dow)))
+
+        (module+ test
+                 (require rackunit)
+                 (check-equal? (day-of-week-short-string sunday) "Sun")
+                 (check-equal? (day-of-week-short-string monday) "Mon")
+                 (check-equal? (day-of-week-short-string tuesday) "Tue")
+                 (check-equal? (day-of-week-short-string wednesday) "Wed")
+                 (check-equal? (day-of-week-short-string thursday) "Thu")
+                 (check-equal? (day-of-week-short-string friday) "Fri")
+                 (check-equal? (day-of-week-short-string saturday) "Sat"))
+
         ; Determine the day of week for a given date.
         ; https://de.wikipedia.org/wiki/Wochentagsberechnung
         ; The day of the week is calculated as a number from 0 (Sunday) to 6 (Saturday).
         ; The formula is based on Zeller's Congruence.
+
         (define (day-of-week date)
           ; Adjust month and year for Zeller's algorithm 
           (define m-julian (if (< (gdate-month date) 3) (+ (gdate-month date) 10) (- (gdate-month date) 2)))

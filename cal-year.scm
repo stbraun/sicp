@@ -3,11 +3,12 @@
 
 (module cal-year racket
         (require "calendar.scm")
-        (provide create-calendar)
+        (provide create-calendar
+                 print-calendar)
 
         (define (create-calendar year)
           (define (create-entry date event)
-            (list date (day-of-week-string (day-of-week date)) event))
+            (list date (day-of-week-short-string (day-of-week date)) event))
           (define (create-date day month year)
             (gdate year month day))
           (define calendar '())
@@ -29,6 +30,12 @@
           (set! calendar (cons (create-entry (gdate year 12 25) "1. Weihnachtstag") calendar))
           (set! calendar (cons (create-entry (gdate year 12 26) "2. Weihnachtstag") calendar))
           (set! calendar (cons (create-entry (gdate year 12 31) "Silvester") calendar))
-          (reverse calendar))
+          (sort calendar gdate< #:key car))
+
+        ;; Print the calendar in a readable format
+        (define (print-calendar calendar)
+          (for-each (lambda (entry)
+                      (printf "~a ~a - ~a\n" (format-date (car entry)) (cadr entry) (caddr entry)))
+                    calendar))
 
         ) ; end module
