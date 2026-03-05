@@ -8,7 +8,7 @@
                  search-for-primes3
                  miller-rabin-test)
 
-        (require "utils.scm"
+        (require "utils.rkt"
                  sicp)
 
         ; This version searches the smallest integral divisor 
