@@ -5,7 +5,7 @@
                  factorial-i)
 
         ; Recursive approach.
-        ; Both procedure and process aare recursive.
+        ; Both procedure and process are recursive.
         ; The process is first expanding and than contracting again.
         ; This is a linear recursive process.
         (define (factorial-r n)
@@ -34,7 +34,7 @@
 
         ; Iterative approach
         ; The procedure is recursive, but the process is iterative: 
-        ; its state is captured competely by its three state variables, 
+        ; its state is captured completely by its three state variables, 
         ; and an interpreter need keep track of only three variables 
         ; in order to execute the process.
         ; This is a linear iterative process.

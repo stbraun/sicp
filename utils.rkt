@@ -168,7 +168,7 @@
   ; Format a number to a specified number of decimal places.
   (define (round-number num decimal-places)
     (let ([multiplier (expt 10 decimal-places)])
-      (/ (round (* num multiplier)) multiplier)))
+      (/ (round (* (exact->inexact num) multiplier)) multiplier)))
 
   (module+ test
     (require rackunit)

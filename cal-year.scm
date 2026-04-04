@@ -9,8 +9,6 @@
         (define (create-calendar year)
           (define (create-entry date event)
             (list date (day-of-week-short-string (day-of-week date)) event))
-          (define (create-date day month year)
-            (gdate year month day))
           (define calendar '())
           (set! calendar (cons (create-entry (gdate year 1 1) "Neujahr") calendar))
           (set! calendar (cons (create-entry (gdate year 2 4) "*Lara") calendar))

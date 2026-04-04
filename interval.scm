@@ -4,6 +4,7 @@
         (provide make-interval
                  make-center-width
                  make-center-percent
+                 make-center
                  lower-bound
                  upper-bound
                  center
@@ -20,15 +21,22 @@
                  print-center-percent
                  printn-center-percent)
 
+        ;; Create interval with defined upper and lower bound
         (define (make-interval lower-bound upper-bound)
           (cons lower-bound upper-bound))
 
+        ;; Create interval with a center and a symmetric width
         (define (make-center-width c w)
           (make-interval (- c w) (+ c w)))
-
+ 
+        ;; Create interval with a center and a symmetric percentage width
         (define (make-center-percent c p)
           (let ((w (/ (* c p) 100)))
             (make-interval (- c w) (+ c w))))
+
+        ;; Create interval without tolerances
+        (define (make-center c)
+          (make-interval c c))
 
         (define (lower-bound i)
           (car i))
