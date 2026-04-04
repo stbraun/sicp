@@ -1,6 +1,6 @@
 ; Finding roots of functions.
 
-(require "utils.scm")
+(require "utils.rkt")
 
 ; Finding roots by the half-interval method
 
@@ -159,7 +159,7 @@
 ; to approximate zeros of the cubic x^3 + ax^2 + bx + c.
 
 (define (cubic a b c)
-  (lambda (x) (+ (* x x x) (* a x x) (* b x) c))))
+  (lambda (x) (+ (* x x x) (* a x x) (* b x) c)))
 
 (newtons-method (cubic 1 1 1) 1)
 
