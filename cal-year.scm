@@ -3,9 +3,15 @@
 
 (module cal-year racket
         (require "calendar.scm")
-        (provide create-calendar
+        (provide cal-year
+                 create-calendar
                  print-calendar)
 
+        ; Create and print a list of holidays and special days for the given year.
+        (define (cal-year year)
+          (print-calendar (create-calendar year)))
+
+        ; Create a list of holidays and other special dates for a given year.
         (define (create-calendar year)
           (define (create-entry date event)
             (list date (day-of-week-short-string (day-of-week date)) event))
