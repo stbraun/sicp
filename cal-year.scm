@@ -7,6 +7,22 @@
                  create-calendar
                  print-calendar)
 
+        (module+ main
+          (define args (current-command-line-arguments))
+          
+          (when (not (= (vector-length args) 1))
+            (displayln "Usage: cal-year <year>")
+            (exit 1))
+          
+          (define year-str (vector-ref args 0))
+          (define year (string->number year-str))
+          
+          (when (not year)
+            (displayln (format "Error: '~a' is not a valid number." year-str))
+            (exit 1))
+          
+          (cal-year year))
+
         ; Create and print a list of holidays and special days for the given year.
         (define (cal-year year)
           (print-calendar (create-calendar year)))
