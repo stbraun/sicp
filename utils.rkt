@@ -128,6 +128,8 @@
 
   (module+ test
     (require rackunit)
+    (check-equal? (average 2 -2) 0)
+    (check-equal? (average -2 -2) -2)
     (check-equal? (average 2 4) 3)
     (check-equal? (average 3 5) 4)
     (check-equal? (average 44 66) 55))
@@ -139,6 +141,8 @@
 
   (module+ test
     (require rackunit)
+    (check-equal? (minimum '()) 0)
+    (check-equal? (minimum '(42)) 42)
     (check-equal? (minimum '(2 4 6)) 2)
     (check-equal? (minimum '(8 5 7 3)) 3)
     (check-equal? (minimum '(57 44 66 88)) 44))
@@ -150,6 +154,8 @@
 
   (module+ test
     (require rackunit)
+    (check-equal? (maximum '()) 0)
+    (check-equal? (maximum '(42)) 42)
     (check-equal? (maximum '(2 4 6)) 6)
     (check-equal? (maximum '(8 5 7 3)) 8)
     (check-equal? (maximum '(57 44 88 66)) 88))
@@ -172,7 +178,10 @@
 
   (module+ test
     (require rackunit)
+    (check-equal? (round-number -3.14159 2) -3.14)
+    (check-equal? (round-number -3.14159 3) -3.142)
     (check-equal? (round-number 3.14159 2) 3.14)
+    (check-equal? (round-number 3.14159 3) 3.142)
     (check-equal? (round-number 2.71828 3) 2.718)
     (check-equal? (round-number 1.61803 4) 1.6180))
 
