@@ -3,7 +3,7 @@
 
 ; Calculate the square root using Newton's method
 
-(require "utils.scm")
+(require "utils.rkt")
 
 (define (sqrt-iter guess last-guess x)
   (if (good-enough? guess last-guess x)

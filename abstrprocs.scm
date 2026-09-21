@@ -9,7 +9,7 @@
                  integral
                  simpsons-rule)
 
-        (require "utils.scm")
+        (require "utils.rkt")
 
         ; Often the same patterns shows up when writing procedures.
         ; For example, when summing up some values the skeleton of

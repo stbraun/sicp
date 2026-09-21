@@ -6,7 +6,7 @@
                  fast-expt-r
                  fast-expt-i)
 
-        (require "utils.scm")
+        (require "utils.rkt")
 
         ; Compute the exponential of a given number.
         ; the procedure takes as arguments a base b and a positive integer n and computes b^n.

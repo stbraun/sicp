@@ -5,7 +5,7 @@
 (module sqrt racket
         (provide sqrt)
 
-        (require "utils.scm")
+        (require "utils.rkt")
 
         (define (sqrt x)
           (define (sqrt-iter guess last-guess)

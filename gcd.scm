@@ -3,10 +3,10 @@
 (module gcd racket
         (provide gcd)
 
-        (require "utils.scm")
+        (require "utils.rkt")
 
         ; Euclid's algorithm
-        ; If r is the reainder when a is divided by b, 
+        ; If r is the remainder when a is divided by b, 
         ; then the common divisors of a and b are precisely 
         ; the same as the common divisors of b and r.
         ; Thus, we can use the equation
