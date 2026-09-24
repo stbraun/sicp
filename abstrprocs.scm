@@ -96,9 +96,9 @@
                  (define (cube-int n)
                    (simpsons-rule cube 0 1.0 n))
 
-                 (timed-test cube-int 100 "Integral of function cube between 0 and 1.0.")
-                 (timed-test cube-int 1000 "Integral of function cube between 0 and 1.0.")
-                 (timed-test cube-int 10000 "Integral of function cube between 0 and 1.0."))
+                 (timed-test cube-int '(10000) "Integral of function cube between 0 and 1.0.")
+                 (timed-test cube-int '(100000) "Integral of function cube between 0 and 1.0.")
+                 (timed-test cube-int '(1000000) "Integral of function cube between 0 and 1.0."))
 
 
         ; Exercise 1.30
@@ -115,13 +115,13 @@
                  (check-equal? 55 (sum-i identity 1 inc 10))
                  (check-equal? 3025 (sum-i cube 1 inc 10))
 
-                 (timed-test (lambda (n) (sum cube 1 inc n)) 100 "sum cube 1 to n")
-                 (timed-test (lambda (n) (sum cube 1 inc n)) 1000 "sum cube 1 to n")
-                 (timed-test (lambda (n) (sum cube 1 inc n)) 10000 "sum cube 1 to n")
+                 (timed-test (lambda (n) (sum cube 1 inc n)) '(10000) "sum cube 1 to n")
+                 (timed-test (lambda (n) (sum cube 1 inc n)) '(100000) "sum cube 1 to n")
+                 (timed-test (lambda (n) (sum cube 1 inc n)) '(1000000) "sum cube 1 to n")
 
-                 (timed-test (lambda (n) (sum-i cube 1 inc n)) 100 "sum-i cube 1 to n")
-                 (timed-test (lambda (n) (sum-i cube 1 inc n)) 1000 "sum-i cube 1 to n")
-                 (timed-test (lambda (n) (sum-i cube 1 inc n)) 10000 "sum-i cube 1 to n"))
+                 (timed-test (lambda (n) (sum-i cube 1 inc n)) '(10000) "sum-i cube 1 to n")
+                 (timed-test (lambda (n) (sum-i cube 1 inc n)) '(100000) "sum-i cube 1 to n")
+                 (timed-test (lambda (n) (sum-i cube 1 inc n)) '(1000000) "sum-i cube 1 to n"))
 
 
         ; Exercise 1.31
