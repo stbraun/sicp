@@ -41,6 +41,7 @@
           (set! calendar (cons (create-entry (easter-monday year) "Ostermontag") calendar))
           (set! calendar (cons (create-entry (whit-sunday year) "Pfingstsonntag") calendar))
           (set! calendar (cons (create-entry (whit-monday year) "Pfingstmontag") calendar))
+          (set! calendar (cons (create-entry (gdate year 10 3) "Tag der Deutschen Einheit") calendar))
           (set! calendar (cons (create-entry (gdate year 11 29) "*Meral") calendar))
           (set! calendar (cons (create-entry (advent year 1) "1. Advent") calendar))
           (set! calendar (cons (create-entry (advent year 2) "2. Advent") calendar))
